@@ -13,11 +13,12 @@ from collections import OrderedDict
 
 import preprocessing as pp
 
+
 def main(n_z, n_hidden, dataset, seed, gfx=True, _size=None):
-    '''Learn a variational auto-encoder with generative model p(x,y,z)=p(y)p(z)p(x|y,z).
+    """Learn a variational auto-encoder with generative model p(x,y,z)=p(y)p(z)p(x|y,z).
     x and y are (always) observed.
     I.e. this cannot be used for semi-supervised learning
-    '''
+    """
     assert (type(n_hidden) == tuple or type(n_hidden) == list)
     assert type(n_z) == int
     assert isinstance(dataset, basestring)
@@ -155,7 +156,7 @@ def main(n_z, n_hidden, dataset, seed, gfx=True, _size=None):
     n_hidden_q = n_hidden
     n_hidden_p = n_hidden
     from anglepy.models import GPUVAE_YZ_X
-    updates = get_adam_optimizer(alpha=3e-4, beta1=0.9, beta2=0.999, weight_decay=0)
+    updates = get_adam_optimizer(alpha=np.float32(3e-4), beta1=np.float32(0.9), beta2=np.float32(0.999), weight_decay=0)
     model = GPUVAE_YZ_X(updates, n_x, n_y, n_hidden_q, n_z, n_hidden_p[::-1], 'softplus', 'softplus', type_px=type_px, type_qz='gaussianmarg', type_pz='gaussianmarg', prior_sd=1, uniform_y=True)
     
     if False:
@@ -319,7 +320,7 @@ def epoch_vae_adam(model, x, n_batch=100, convertImgs=False, bernoulli_x=False, 
         
     return doEpoch
 
-def get_adam_optimizer(alpha=3e-4, beta1=0.9, beta2=0.999, weight_decay=0.0):
+def get_adam_optimizer(alpha=np.float32(3e-4), beta1=np.float32(0.9), beta2=np.float32(0.999), weight_decay=0.0):
     print 'AdaM', alpha, beta1, beta2, weight_decay
     def shared32(x, name=None, borrow=False):
         return theano.shared(np.asarray(x, dtype='float32'), name=name, borrow=borrow)
@@ -345,11 +346,12 @@ def get_adam_optimizer(alpha=3e-4, beta1=0.9, beta2=0.999, weight_decay=0.0):
             mom2 = shared32(w[i].get_value() * 0.)
             
             # Update moments
-            mom1_new = mom1 + (1.-beta1) * (gi - mom1)
-            mom2_new = mom2 + (1.-beta2) * (T.sqr(gi) - mom2)
-            
+            # mom1_new = mom1 * (gi - mom1)
+            mom1_new = mom1 + (np.float32(1.)-beta1) * (gi - mom1)
+            mom2_new = mom2 + (np.float32(1.)-beta2) * (T.sqr(gi) - mom2)
+
             # Compute the effective gradient
-            effgrad = mom1_new / (T.sqrt(mom2_new) + 1e-8)
+            effgrad = mom1_new / (T.sqrt(mom2_new) + np.float32(1e-8))
             
             # Do update
             w_new = w[i] + lr_t * effgrad

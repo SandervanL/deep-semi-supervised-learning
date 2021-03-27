@@ -252,7 +252,7 @@ def main(n_z, n_hidden, dataset, seed, comment, gfx=True):
         
     # Construct model
     from anglepy.models import GPUVAE_Z_X
-    updates = get_adam_optimizer(learning_rate=3e-4, weight_decay=weight_decay)
+    updates = get_adam_optimizer(learning_rate=np.float32(3e-4), weight_decay=np.float32(weight_decay))
     model = GPUVAE_Z_X(updates, n_x, n_hidden, n_z, n_hidden[::-1], nonlinear, nonlinear, type_px, type_qz=type_qz, type_pz=type_pz, prior_sd=100, init_sd=1e-3)
     
     if False:
@@ -409,7 +409,7 @@ def epoch_vae_adam(model, x, n_batch=100, convertImgs=False, bernoulli_x=False, 
     return doEpoch
 
 
-def get_adam_optimizer(learning_rate=0.001, decay1=0.1, decay2=0.001, weight_decay=0.0):
+def get_adam_optimizer(learning_rate=np.float32(0.001), decay1=np.float32(0.1), decay2=np.float32(0.001), weight_decay=np.float32(0.0)):
     print 'AdaM', learning_rate, decay1, decay2, weight_decay
     def shared32(x, name=None, borrow=False):
         return theano.shared(np.asarray(x, dtype='float32'), name=name, borrow=borrow)
@@ -419,9 +419,10 @@ def get_adam_optimizer(learning_rate=0.001, decay1=0.1, decay2=0.001, weight_dec
         
         it = shared32(0.)
         updates[it] = it + 1.
-        
-        fix1 = 1.-(1.-decay1)**(it+1.) # To make estimates unbiased
-        fix2 = 1.-(1.-decay2)**(it+1.) # To make estimates unbiased
+
+        one = np.float32(1.)
+        fix1 = one-(one-decay1)**(it+one) # To make estimates unbiased
+        fix2 = one-(one-decay2)**(it+one) # To make estimates unbiased
         lr_t = learning_rate * T.sqrt(fix2) / fix1
         
         for i in w:
@@ -439,7 +440,7 @@ def get_adam_optimizer(learning_rate=0.001, decay1=0.1, decay2=0.001, weight_dec
             mom2_new = mom2 + decay2 * (T.sqr(gi) - mom2)
             
             # Compute the effective gradient and effective learning rate
-            effgrad = mom1_new / (T.sqrt(mom2_new) + 1e-10)
+            effgrad = mom1_new / (T.sqrt(mom2_new) + np.float32(1e-10))
             
             effstep_new = lr_t * effgrad
             
