@@ -56,3 +56,4 @@ target/
 results/
 .idea/
 *.mkv
+ffmpeg.exe
