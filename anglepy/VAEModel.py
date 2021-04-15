@@ -93,8 +93,8 @@ class VAEModel(object):
         logpx, logpz, logqz = self.f_L(*allvars)
         
         if np.isnan(logpx).any() or np.isnan(logpz).any() or np.isnan(logqz).any():
-            print 'logp: ', logpx, logpz, logqz
-            print 'Values:'
+            print('logp: ', logpx, logpz, logqz)
+            print('Values:')
             ndict.p(v)
             ndict.p(w)
             ndict.p(x)
@@ -108,16 +108,13 @@ class VAEModel(object):
         
         if ndict.hasNaN(gv) or ndict.hasNaN(gw):
                 raise Exception("dL_dw(): NaN found in gradients")
-                #print 'logpx: ', logpx
-                #print 'logpz: ', logpz
-                #print 'logqz: ', logqz
-                print 'v:'
+                print('v:')
                 ndict.p(v)
-                print 'w:'
+                print('w:')
                 ndict.p(w)
-                print 'gv:'
+                print('gv:')
                 ndict.p(gv)
-                print 'gw:'
+                print('gw:')
                 ndict.p(gw)
                 raise Exception("dL_dw(): NaN found in gradients")
         

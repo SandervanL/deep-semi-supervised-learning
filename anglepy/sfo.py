@@ -209,15 +209,15 @@ class SFO(object):
                                                                                                mean(self.hist_f[
                                                                                                         self.eval_count > 0, 0])))
         if num_steps < 1:
-            print "No optimization steps performed.  Change num_passes or num_steps."
+            print("No optimization steps performed.  Change num_passes or num_steps.")
         elif self.display > 0:
             print("active {0}/{1}, pass #{2}, sfo {3} s, func {4} s, <f> {5}".format(sum(self.active),
                                                                                      self.active.shape[0], float(
                     sum(self.eval_count)) / self.N, self.time_pass - self.time_func, self.time_func, mean(
                     self.hist_f[self.eval_count > 0, 0])))
             if (self.time_pass - self.time_func) > self.time_func and self.N >= 25 and self.time_pass > 60:
-                print "More time was spent in SFO than the objective function."
-                print "You may want to consider breaking your data into fewer minibatches to reduce overhead."
+                print("More time was spent in SFO than the objective function.")
+                print("You may want to consider breaking your data into fewer minibatches to reduce overhead.")
 
         # reverse the flattening transformation on theta
         return self.theta_flat_to_original(self.theta)
@@ -236,7 +236,7 @@ class SFO(object):
         if small_diff is None:
             # step size to use for gradient check
             small_diff = self.eps * 1e6
-        print "Testing step size %g" % small_diff
+        print("Testing step size %g" % small_diff)
 
         for i in random.permutation(range(self.N)):
             fl, dfl = self.f_df_wrapper(self.theta, i, return_full=True)
@@ -839,7 +839,7 @@ class SFO(object):
             self.cyclic_subfunction_index %= sum(self.active)
             return indx
 
-        throw("unknown subfunction choice method")
+        raise Exception("unknown subfunction choice method")
 
     def handle_step_failure(self, f, df_proj, indx):
         """

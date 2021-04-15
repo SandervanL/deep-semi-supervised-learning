@@ -25,10 +25,10 @@ def main(n_passes, n_labeled, n_z, n_hidden, dataset, seed, alpha, n_minibatches
     import time
     logdir = 'results/learn_yz_x_ss_'+dataset+'_'+str(n_z)+'-'+str(n_hidden)+'_nlabeled'+str(n_labeled)+'_alpha'+str(alpha)+'_seed'+str(seed)+'_'+comment+'-'+str(int(time.time()))+'/'
     if not os.path.exists(logdir): os.makedirs(logdir)
-    print 'logdir:', logdir
-    
-    print sys.argv[0], n_labeled, n_z, n_hidden, dataset, seed, comment
-    
+    print('logdir:', logdir)
+
+    print(sys.argv[0], n_labeled, n_z, n_hidden, dataset, seed, comment)
+
     np.random.seed(seed)
     
     # Init data
@@ -172,10 +172,10 @@ def main(n_passes, n_labeled, n_z, n_hidden, dataset, seed, alpha, n_minibatches
         ndict.savez(w, logdir+'w')
     
         dt = time.time() - t0
-        
-        print dt, t, ll, valid_error, test_error
+
+        print(dt, t, ll, valid_error, test_error)
         with open(logdir+'hook.txt', 'a') as f:
-            print >>f, dt, t, ll, valid_error, test_error
+            print(dt, t, ll, valid_error, test_error, file=f)
         
         return valid_error
 

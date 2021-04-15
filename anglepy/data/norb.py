@@ -2,7 +2,7 @@ import numpy as np
 import scipy.io
 import os
 import gzip
-import cPickle
+import _pickle as cPickle
 
 path = os.environ['ML_DATA_PATH']+'/norb/'
 

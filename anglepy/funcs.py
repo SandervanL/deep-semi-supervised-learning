@@ -10,7 +10,7 @@ class FuncLikelihood():
 		self.n_batch = n_batch
 		self.n_datapoints = x.itervalues().next().shape[1]
 		if self.n_datapoints%(self.n_batch) != 0:
-			print self.n_datapoints, self.n_batch
+			print(self.n_datapoints, self.n_batch)
 			raise BaseException()
 		self.blocksize = self.n_batch
 		self.n_minibatches = self.n_datapoints/self.blocksize

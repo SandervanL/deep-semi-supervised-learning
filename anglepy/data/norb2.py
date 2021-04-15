@@ -2,7 +2,7 @@ import numpy as np
 import scipy.io
 import os
 import gzip
-import cPickle
+import _pickle as cPickle
 
 path = os.environ['ML_DATA_PATH']+'/norb_orig_np/'
 
@@ -58,7 +58,7 @@ def load_numpy_subclasses(size=48, binarize_y=False):
 def convert_orig_to_np():
     from pylearn2.datasets.filetensor import read
     import gzip
-    import cPickle
+    import _pickle as cPickle
     # Load data
     path_orig = os.environ['ML_DATA_PATH']+'/norb_orig/'
     prefix_train = path_orig+'smallnorb-5x46789x9x18x6x2x96x96-training-'
@@ -73,7 +73,7 @@ def convert_orig_to_np():
     # Save originals matrices to file
     files = (('train_cat', train_cat), ('train_dat_96', train_dat), ('train_info', train_info), ('test_cat', test_cat), ('test_dat_96', test_dat), ('test_info', test_info))
     for fname, tensor in files:
-        print 'Saving to ', fname, '...'
+        print('Saving to ', fname, '...')
         with gzip.open(path+fname+'.pkl.gz','wb') as f:
             cPickle.dump(tensor, f)
 
@@ -81,7 +81,7 @@ def convert_orig_to_np():
     w = 48
     files = (('test_dat', test_dat),)
     for fname, tensor in files:
-        print 'Generating downscaled version ' + fname + '...'
+        print('Generating downscaled version ' + fname + '...')
         left = reshape_images(tensor[:,0,:,:], (w,w))
         right = reshape_images(tensor[:,1,:,:], (w,w)) 
         result = np.zeros((tensor.shape[0], 2, w, w), dtype=np.uint8)
@@ -109,4 +109,3 @@ def binarize_labels(y, n_classes=5):
     for i in range(y.shape[0]):
         new_y[y[i], i] = 1
     return new_y
-    

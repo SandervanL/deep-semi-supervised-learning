@@ -116,8 +116,8 @@ class BNModel(object):
         allvars = w.values() + x.values() + z.values() + [A]
         logpx, logpz = self.f_logpxz(*allvars)
         if np.isnan(logpx).any() or np.isnan(logpz).any():
-            print 'v: ', logpx, logpz
-            print 'Values:'
+            print('v: ', logpx, logpz)
+            print('Values:')
             ndict.p(w)
             ndict.p(z)
             raise Exception("dlogpxz_dwz(): NaN found in gradients")
@@ -137,8 +137,8 @@ class BNModel(object):
         for i in range(len(keys)):
             if keys[i] != self.allvars_keys[i]:
                 "Input values are incorrect!"
-                print 'Input:', keys
-                print 'Should be:', self.allvars_keys
+                print('Input:', keys)
+                print('Should be:', self.allvars_keys)
                 raise Exception()
             
         r = self.f_dlogpxz_dwz(*allvars)
@@ -146,17 +146,17 @@ class BNModel(object):
         
         if ndict.hasNaN(gw) or ndict.hasNaN(gz):
             if True:
-                print 'NaN detected in gradients'
+                print('NaN detected in gradients')
                 raise Exception()
                 for i in gw: gw[i][np.isnan(gw[i])] = 0
                 for i in gz: gz[i][np.isnan(gz[i])] = 0
             else:
-                print 'logpx: ', logpx
-                print 'logpz: ', logpz
-                print 'Values:'
+                print('logpx: ', logpx)
+                print('logpz: ', logpz)
+                print('Values:')
                 ndict.p(w)
                 ndict.p(z)
-                print 'Gradients:'
+                print('Gradients:')
                 ndict.p(gw)
                 ndict.p(gz)
                 raise Exception("dlogpxz_dwz(): NaN found in gradients")
@@ -223,16 +223,15 @@ class BNModel(object):
         
         if ndict.hasNaN(gw):
             if True:
-                print 'NaN detected in gradients'
+                print('NaN detected in gradients')
                 raise Exception()
                 for i in gw: gw[i][np.isnan(gw[i])] = 0
             else:
-                
-                print 'fd: ', fd
-                print 'Values:'
+                print('fd: ', fd)
+                print('Values:')
                 ndict.p(w)
                 ndict.p(z)
-                print 'Gradients:'
+                print('Gradients:')
                 ndict.p(gw)
                 raise Exception("dfd_dw(): NaN found in gradients")
         

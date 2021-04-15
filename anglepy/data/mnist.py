@@ -1,5 +1,6 @@
 import numpy as np
-import cPickle, gzip
+import _pickle as cPickle
+import gzip
 import theano
 import theano.tensor as T
 import os

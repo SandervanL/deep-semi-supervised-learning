@@ -144,13 +144,13 @@ def setShapes(d, shapes):
     return result
 
 def p(d):
-    for i in d: print i+'\n', d[i]
+    for i in d: print(i+'\n', d[i])
 
 def pNorm(d):
-    for i in d: print i, numpy.linalg.norm(d[i])
+    for i in d: print(i, numpy.linalg.norm(d[i]))
 
 def pShape(d):
-    for i in d: print i, d[i].shape
+    for i in d: print(i, d[i].shape)
 
 def hasNaN(d):
     result = False
@@ -167,7 +167,7 @@ def set_value(d, d2):
     return {i: d[i].set_value(d2[i]) for i in d}
 
 def savetext(d, name):
-    for i in d: np.savetxt(file('debug_'+name+'.txt', 'w'), d[i])
+    for i in d: np.savetxt('debug_'+name+'.txt', d[i])
     
 def ordered(d):
     return C.OrderedDict(sorted(d.items()))
