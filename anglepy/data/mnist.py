@@ -1,5 +1,5 @@
 import numpy as np
-import _pickle as cPickle
+import pickle
 import gzip
 import theano
 import theano.tensor as T
@@ -14,7 +14,7 @@ paths = {
 
 def load_theano(size=28):
     f = gzip.open(paths[size], 'rb')
-    train, valid, test = cPickle.load(f)
+    train, valid, test = pickle.load(f)
     f.close()
     def shared_dataset(data_xy, borrow=True):
         data_x, data_y = data_xy
@@ -29,7 +29,7 @@ def load_theano(size=28):
 def load_numpy(size=28, binarize_y=False):
     # MNIST dataset
     f = gzip.open(paths[size], 'rb')
-    train, valid, test = cPickle.load(f)
+    train, valid, test = pickle.load(f, encoding='bytes')
     f.close()
     train_x, train_y = train
     valid_x, valid_y = valid
@@ -90,13 +90,13 @@ def save_reshaped(shape):
 
     # MNIST dataset
     f = gzip.open(paths[28], 'rb')
-    train, valid, test = cPickle.load(f)
+    train, valid, test = pickle.load(f)
     train = reshape_digits(train[0], shape), train[1]
     valid = reshape_digits(valid[0], shape), valid[1]
     test = reshape_digits(test[0], shape), test[1]
     f.close()
     f = gzip.open(os.path.dirname(__file__)+'/mnist_'+str(shape[0])+'_.pkl.gz','wb')
-    cPickle.dump((train, valid, test), f)
+    pickle.dump((train, valid, test), f)
     f.close()
     
 def make_random_projection(shape):
@@ -114,13 +114,13 @@ def create_semisupervised(x, y, n_labeled):
     n_x = x[0].shape[0]
     n_classes = y[0].shape[0]
     if n_labeled%n_classes != 0: raise("n_labeled (wished number of labeled samples) not divisible by n_classes (number of classes)")
-    n_labels_per_class = n_labeled/n_classes
+    n_labels_per_class = int(n_labeled/n_classes)
     x_labeled = [0]*n_classes
     x_unlabeled = [0]*n_classes
     y_labeled = [0]*n_classes
     y_unlabeled = [0]*n_classes
     for i in range(n_classes):
-        idx = range(x[i].shape[1])
+        idx = list(range(x[i].shape[1]))
         random.shuffle(idx)
         x_labeled[i] = x[i][:,idx[:n_labels_per_class]]
         y_labeled[i] = y[i][:,idx[:n_labels_per_class]]

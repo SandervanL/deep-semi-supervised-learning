@@ -66,7 +66,7 @@ def zca(X):
 
 	# tmp
 	#Y = W.dot(X)
-	#print Y.dot(Y.T)[0:5,0:5]
+	#print(Y.dot(Y.T)[0:5,0:5])
 	#raise Exception()
 
 	return mean, W, Winv

@@ -77,13 +77,13 @@ def log_gamma_lanczos_sub(z): #vectorised version
 def lazytheanofunc(on_unused_input='warn', mode='FAST_RUN'):
     def theanofunction(*args, **kwargs):
         f = [None]
-        if not kwargs.has_key('on_unused_input'):
+        if 'on_unused_input' not in kwargs:
             kwargs['on_unused_input'] = on_unused_input
-        if not kwargs.has_key('mode'):
+        if 'mode' not in kwargs:
             kwargs['mode'] = mode
 
         def func(*args2, **kwargs2):
-            if f[0] == None:
+            if f[0] is None:
                 f[0] = theano.function(*args, **kwargs)
             return f[0](*args2, **kwargs2)
 

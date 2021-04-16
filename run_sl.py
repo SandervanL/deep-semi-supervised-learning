@@ -76,10 +76,10 @@ print('Result (test-set error %): ', result)
 
 '''
 # Compare predictions with truth
-print 'Predicting with 1, 10, 100 and 1000 samples'
+print('Predicting with 1, 10, 100 and 1000 samples')
 for n_samples in [1,10,100,1000]:
-    print 'Computing predictions with n_samples = ', n_samples
+    print('Computing predictions with n_samples = ', n_samples)
     predictions = get_predictions(n_samples)
     error_perc = 100* (predictions != test_y).sum() / (1.*test_y.shape[0])
-    print 'Error rate is ', error_perc, '%'
+    print('Error rate is ', error_perc, '%')
 '''

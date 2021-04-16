@@ -56,7 +56,7 @@ class MLP_Categorical(ap.BNModel):
         
         # function for distribution q(z|x)
         theanofunc = lazytheanofunc('ignore', mode='FAST_RUN')
-        self.dist_px['y'] = theanofunc([x['x']] + w.values() + [A], self.p)
+        self.dist_px['y'] = theanofunc([x['x']] + list(w.values()) + [A], self.p)
         
         logpz = 0 * A
         return logpw, logpx, logpz
@@ -72,7 +72,7 @@ class MLP_Categorical(ap.BNModel):
         _z = {}
         if not x.has_key('y'):
             w = ndict.ordered(w)
-            py = self.dist_px['y'](*([x['x']] + w.values() + [A]))
+            py = self.dist_px['y'](*([x['x']] + list(w.values()) + [A]))
             _z['py'] = py
             x['y'] = np.zeros(py.shape)
             for i in range(n_batch):

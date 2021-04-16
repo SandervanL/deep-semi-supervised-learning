@@ -11,7 +11,7 @@ import theano
 def getCols(d, ifrom, ito):
     result = {}
     for i in d:
-        result[i] = d[i][:,ifrom:ito]
+        result[i] = d[i][:,int(ifrom):int(ito)]
     return result
 
 def getColsFromIndices(d, colIndices):
@@ -170,7 +170,7 @@ def savetext(d, name):
     for i in d: np.savetxt('debug_'+name+'.txt', d[i])
     
 def ordered(d):
-    return C.OrderedDict(sorted(d.items()))
+    return dict(sorted(d.items()))
 
 # converts normal dicts to ordered dicts, ordered by keys
 def ordereddicts(ds):
@@ -184,7 +184,7 @@ def orderedvals(ds):
 # Shuffle all elements of ndict
 # Assumes that each element of dict has some number of columns!
 def shuffleCols(d):
-    n_cols = d.itervalues().next().shape[1]
+    n_cols = next(iter(d.values())).shape[1]
     idx = np.arange(n_cols)
     np.random.shuffle(idx)
     for i in d:
@@ -217,7 +217,7 @@ def loadz(filename):
         members = tar.getmembers()
         arrays = np.load(tar.extractfile(members[0]))
         names = tar.extractfile(members[1]).readlines()
-        result = {names[i][:-1]: arrays['arr_'+str(i)] for i in range(len(names))}
+        result = {names[i][:-1].decode('UTF-8'): arrays['arr_'+str(i)] for i in range(len(names))}
     return ordered(result)
     
 

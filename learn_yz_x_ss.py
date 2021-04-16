@@ -57,7 +57,7 @@ def main(n_passes, n_labeled, n_z, n_hidden, dataset, seed, alpha, n_minibatches
         
         # 1. Determine which dimensions to keep
         def transform(v, _x):
-            return l1_model.dist_qz['z'](*([_x] + v.values() + [np.ones((1, _x.shape[1]))]))
+            return l1_model.dist_qz['z'](*([_x] + list(v.values()) + [np.ones((1, _x.shape[1]))]))
         q_mean, _ = transform(l1_v, x_u[0:1000])
         idx_keep = np.std(q_mean, axis=1) > 0.1
         
@@ -193,11 +193,11 @@ def optim_vae_ss_adam(alpha, model_qy, model, x_labeled, x_unlabeled, n_y, u_ini
     # create minibatches
     minibatches = []
 
-    n_labeled = x_labeled.itervalues().next().shape[1]
+    n_labeled = next(iter(x_labeled.values())).shape[1]
     n_batch_l = n_labeled / n_minibatches
     if (n_labeled%n_batch_l) != 0: raise Exception()
     
-    n_unlabeled = x_unlabeled.itervalues().next().shape[1]
+    n_unlabeled = next(iter(x_unlabeled.values())).shape[1]
     n_batch_u = n_unlabeled / n_minibatches
     if (n_unlabeled%n_batch_u) != 0: raise Exception()
     
@@ -215,8 +215,8 @@ def optim_vae_ss_adam(alpha, model_qy, model, x_labeled, x_unlabeled, n_y, u_ini
     # For integrating-out approach
     L_inner = T.dmatrix()
     L_unlabeled = T.dot(np.ones((1, n_y)), model_qy.p * (L_inner - T.log(model_qy.p)))
-    grad_L_unlabeled = T.grad(L_unlabeled.sum(), model_qy.var_w.values())
-    f_du =  theano.function([model_qy.var_x['x']] + model_qy.var_w.values() + [model_qy.var_A, L_inner], [L_unlabeled] + grad_L_unlabeled)
+    grad_L_unlabeled = T.grad(L_unlabeled.sum(), list(model_qy.var_w.values()))
+    f_du =  theano.function([model_qy.var_x['x']] + list(model_qy.var_w.values()) + [model_qy.var_A, L_inner], [L_unlabeled] + grad_L_unlabeled)
     
     # Some statistics
     L = [0.]
@@ -255,7 +255,7 @@ def optim_vae_ss_adam(alpha, model_qy, model, x_labeled, x_unlabeled, n_y, u_ini
         # -KL(q(z|x,y)q(y|x) ~p(x) || p(x,y,z))
         # Approach where outer expectation (over q(z|x,y)) is taken as explicit sum (instead of sampling)
         u = ndict.ordered(u)
-        py = model_qy.dist_px['y'](*([x_minibatch_u['x']] + u.values() + [np.ones((1, n_batch_u))]))
+        py = model_qy.dist_px['y'](*([x_minibatch_u['x']] + list(u.values()) + [np.ones((1, n_batch_u))]))
         
         if True:
             # Original

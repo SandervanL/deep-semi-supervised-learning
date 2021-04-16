@@ -35,7 +35,7 @@ class GPUVAEModel(object):
         self.var_A = A
         
         # Get gradient symbols
-        allvars = x.values() + z.values() + [A] # note: '+' concatenates lists
+        allvars = list(x.values()) + list(z.values()) + [A] # note: '+' concatenates lists
         
         # TODO: more beautiful/standardized way of setting distributions
         # (should be even simpler than this) 
@@ -47,15 +47,14 @@ class GPUVAEModel(object):
         
         if get_optimizer == None:
             def get_optimizer(w, g):
-                from collections import OrderedDict
-                updates = OrderedDict()
+                updates = {}
                 for i in w: updates[w[i]] = w[i]
                 return updates
 
         # Log-likelihood lower bound
         self.f_L = theanofunction(allvars, [logpx, logpz, logqz])
         L = (logpx + logpz - logqz).sum()
-        g = T.grad(L, v.values() + w.values())
+        g = T.grad(L, list(v.values()) + list(w.values()))
         gv, gw = dict(zip(v.keys(), g[0:len(v)])), dict(zip(w.keys(), g[len(v):len(v)+len(w)]))
         updates = get_optimizer(v, gv)
         updates.update(get_optimizer(w, gw))
@@ -82,7 +81,7 @@ class GPUVAEModel(object):
         x, z = self.xz_to_theano(x, z)
         v, w, x, z = ndict.ordereddicts((v, w, x, z))
         A = self.get_A(x)
-        allvars = v.values() + w.values() + x.values() + z.values() + [A]
+        allvars = list(v.values()) + list(w.values()) + list(x.values()) + list(z.values()) + [A]
         return self.f_dists[name](*allvars)
     
     # Numpy <-> Theano var conversion
@@ -90,14 +89,14 @@ class GPUVAEModel(object):
     def gw_to_numpy(self, gv, gw): return gv, gw
     
     # A = np.ones((1, n_batch))
-    def get_A(self, x): return np.ones((1, x.itervalues().next().shape[1])).astype('float32')
+    def get_A(self, x): return np.ones((1, next(iter(x.values())).shape[1])).astype('float32')
 
     # Evaluate lower bound
     def eval(self, x, z):
         x, z = self.xz_to_theano(x, z)
         z, x = ndict.ordereddicts((z, x))
         A = self.get_A(x)
-        allvars = x.values() + z.values() + [A]
+        allvars = list(x.values()) + list(z.values()) + [A]
         L = self.f_eval(*allvars)
         return L[0]
         
@@ -106,7 +105,7 @@ class GPUVAEModel(object):
         x, z = self.xz_to_theano(x, z)
         z, x = ndict.ordereddicts((z, x))
         A = self.get_A(x)
-        allvars = x.values() + z.values() + [A]
+        allvars = list(x.values()) + list(z.values()) + [A]
         L = self.f_evalAndUpdate(*allvars)
         return L[0]
 
@@ -114,7 +113,7 @@ class GPUVAEModel(object):
     # L is number of samples
     def est_loglik(self, x, n_batch, n_samples=1, byteToFloat=False):
         
-        n_tot = x.itervalues().next().shape[1]
+        n_tot = next(iter(x.values())).shape[1]
         
         px = 0 # estimate of marginal likelihood
         lowbound = 0 # estimate of lower bound of marginal likelihood

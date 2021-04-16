@@ -9,7 +9,6 @@ import math
 
 import theano
 import theano.tensor as T
-from collections import OrderedDict
 
 import preprocessing as pp
 
@@ -297,10 +296,8 @@ def epoch_vae_adam(model, x, n_batch=100, convertImgs=False, bernoulli_x=False, 
     print('Variational Auto-Encoder', n_batch)
 
     def doEpoch():
-        
-        from collections import OrderedDict
 
-        n_tot = x.itervalues().next().shape[1]
+        n_tot = next(iter(x.values)).shape[1]
         idx_from = 0
         L = 0
         while idx_from < n_tot:
@@ -328,7 +325,7 @@ def get_adam_optimizer(alpha=np.float32(3e-4), beta1=np.float32(0.9), beta2=np.f
         return theano.shared(np.asarray(x, dtype='float32'), name=name, borrow=borrow)
 
     def get_optimizer(w, g):
-        updates = OrderedDict()
+        updates = {}
         
         it = shared32(0.)
         updates[it] = it + 1.

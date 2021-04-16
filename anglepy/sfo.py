@@ -238,12 +238,12 @@ class SFO(object):
             small_diff = self.eps * 1e6
         print("Testing step size %g" % small_diff)
 
-        for i in random.permutation(range(self.N)):
+        for i in random.permutation(list(range(self.N))):
             fl, dfl = self.f_df_wrapper(self.theta, i, return_full=True)
             ep = zeros((self.M, 1))
             dfl_obs = zeros((self.M, 1))
             dfl_err = zeros((self.M, 1))
-            for j in random.permutation(range(self.M)):
+            for j in random.permutation(list(range(self.M))):
                 ep[j] = small_diff
                 fl2, _ = self.f_df_wrapper(self.theta + ep, i, return_full=True)
                 dfl_obs[j] = (fl2 - fl) / small_diff
@@ -1035,7 +1035,7 @@ class SFO(object):
         #     ratio_scale = 10.
         #     if length_ratio > ratio_scale:
         #         if self.display > 3:
-        #             print "truncating step length from %g to %g"%(dtheta_proj_length, ratio_scale*avg_length),
+        #             print("truncating step length from %g to %g"%(dtheta_proj_length, ratio_scale*avg_length))
         #         dtheta_proj_length /= length_ratio/ratio_scale
         #         dtheta_proj /= length_ratio/ratio_scale
 

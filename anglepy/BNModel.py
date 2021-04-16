@@ -25,8 +25,8 @@ class BNModel(object):
         self.var_A = A
         
         # Get gradient symbols
-        self.allvars = w.values()  + x.values() + z.values() + [A] # note: '+' concatenates lists
-        self.allvars_keys = w.keys() + x.keys() + z.keys() + ['A']
+        self.allvars = list(w.values()) + list(x.values()) + list(z.values()) + [A] # note: '+' concatenates lists
+        self.allvars_keys = list(w.keys()) + list(x.keys()) + list(z.keys()) + ['A']
         
         if False:
             # Put test values
@@ -52,32 +52,32 @@ class BNModel(object):
         logpxz = logpx.sum() + logpz.sum()
         self.f_logpxz = theanofunction(self.allvars, [logpx, logpz])
         
-        dlogpxz_dwz = T.grad(logpxz, w.values() + z.values())
+        dlogpxz_dwz = T.grad(logpxz, list(w.values()) + list(z.values()))
         self.f_dlogpxz_dwz = theanofunction(self.allvars, [logpx, logpz] + dlogpxz_dwz)
         #self.f_dlogpxz_dw = theanofunction(allvars, [logpxz] + dlogpxz_dw)
         #self.f_dlogpxz_dz = theanofunction(allvars, [logpxz] + dlogpxz_dz)
         
         # prior
-        dlogpw_dw = T.grad(logpw, w.values(), disconnected_inputs='ignore')
-        self.f_logpw = theanofunction(w.values(), logpw)
-        self.f_dlogpw_dw = theanofunction(w.values(), [logpw] + dlogpw_dw)
+        dlogpw_dw = T.grad(logpw, list(w.values()), disconnected_inputs='ignore')
+        self.f_logpw = theanofunction(list(w.values()), logpw)
+        self.f_dlogpw_dw = theanofunction(list(w.values()), [logpw] + dlogpw_dw)
         
         if False:
             # MC-LIKELIHOOD
             logpx_max = logpx.max()
             logpxmc = T.log(T.exp(logpx - logpx_max).mean()) + logpx_max
             self.f_logpxmc = theanofunction(self.allvars, logpxmc)
-            dlogpxmc_dw = T.grad(logpxmc, w.values(), disconnected_inputs=theano_warning)
+            dlogpxmc_dw = T.grad(logpxmc, list(w.values()), disconnected_inputs=theano_warning)
             self.f_dlogpxmc_dw = theanofunction(self.allvars, [logpxmc] + dlogpxmc_dw)
         
         if True and len(z) > 0:
             # Fisher divergence (FD)
-            gz = T.grad(logpxz, z.values())
+            gz = T.grad(logpxz, list(z.values()))
             gz2 = [T.dmatrix() for _ in gz]
             fd = 0
             for i in range(len(gz)):
                 fd += T.sum((gz[i]-gz2[i])**2)
-            dfd_dw = T.grad(fd, w.values())
+            dfd_dw = T.grad(fd, list(w.values()))
             self.f_dfd_dw = theanofunction(self.allvars + gz2, [logpx, logpz, fd] + dfd_dw)
             
         if False and hessian:
@@ -98,7 +98,7 @@ class BNModel(object):
     #    x, z = self.xz_to_theano(x, z)
     #    w, x, z = ndict.ordereddicts((w, x, z))
     #    A = self.get_A(x)
-    #    allvars = w.values() + x.values() + z.values() + [A]
+    #    allvars = list(w.values()) + list(x.values()) + list(z.values()) + [A]
     #    return self.f_dists[name](*allvars)
     
     # Numpy <-> Theano var conversion
@@ -106,14 +106,14 @@ class BNModel(object):
     def gwgz_to_numpy(self, gw, gz): return gw, gz
     
     # A = np.ones((1, n_batch))
-    def get_A(self, x): return np.ones((1, x.itervalues().next().shape[1]))
+    def get_A(self, x): return np.ones((1, next(iter(x.values())).shape[1]))
         
     # Likelihood: logp(x,z|w)
     def logpxz(self, w, x, z):
         x, z = self.xz_to_theano(x, z)
         w, z, x = ndict.ordereddicts((w, z, x))
         A = self.get_A(x)
-        allvars = w.values() + x.values() + z.values() + [A]
+        allvars = list(w.values()) + list(x.values()) + list(z.values()) + [A]
         logpx, logpz = self.f_logpxz(*allvars)
         if np.isnan(logpx).any() or np.isnan(logpz).any():
             print('v: ', logpx, logpz)
@@ -130,7 +130,7 @@ class BNModel(object):
         x, z = self.xz_to_theano(x, z)
         w, z, x = ndict.ordereddicts((w, z, x))
         A = self.get_A(x)
-        allvars = w.values() + x.values() + z.values() + [A]
+        allvars = list(w.values()) + list(x.values()) + list(z.values()) + [A]
         
         # Check if keys are correct
         keys = w.keys() + x.keys() + z.keys() + ['A']
