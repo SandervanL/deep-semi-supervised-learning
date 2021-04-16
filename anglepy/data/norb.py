@@ -85,8 +85,8 @@ def save_reshaped(shape):
     test = reshape_digits(test_x, shape), test_y
     
     f = gzip.open(path+'norb_'+str(shape[0])+'.pkl.gz','wb')
-    import cPickle
-    cPickle.dump((train, test), f)
+    import pickle
+    pickle.dump((train, test), f)
     f.close()
 
     
