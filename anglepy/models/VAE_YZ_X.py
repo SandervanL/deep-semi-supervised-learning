@@ -147,7 +147,7 @@ class VAE_YZ_X(ap.VAEModel):
     
     # Generate epsilon from prior
     def gen_eps(self, n_batch):
-        z = {'eps': np.random.standard_normal(size=(self.n_z, n_batch))}
+        z = {'eps': np.random.standard_normal(size=(int(self.n_z), int(n_batch)))}
         return z
     
     # Generate variables

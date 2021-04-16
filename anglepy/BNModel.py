@@ -133,7 +133,7 @@ class BNModel(object):
         allvars = list(w.values()) + list(x.values()) + list(z.values()) + [A]
         
         # Check if keys are correct
-        keys = w.keys() + x.keys() + z.keys() + ['A']
+        keys = list(w.keys()) + list(x.keys()) + list(z.keys()) + ['A']
         for i in range(len(keys)):
             if keys[i] != self.allvars_keys[i]:
                 "Input values are incorrect!"

@@ -255,15 +255,15 @@ def optim_vae_ss_adam(alpha, model_qy, model, x_labeled, x_unlabeled, n_y, u_ini
         # -KL(q(z|x,y)q(y|x) ~p(x) || p(x,y,z))
         # Approach where outer expectation (over q(z|x,y)) is taken as explicit sum (instead of sampling)
         u = ndict.ordered(u)
-        py = model_qy.dist_px['y'](*([x_minibatch_u['x']] + list(u.values()) + [np.ones((1, n_batch_u))]))
+        py = model_qy.dist_px['y'](*([x_minibatch_u['x']] + list(u.values()) + [np.ones((1, int(n_batch_u)))]))
         
         if True:
             # Original
-            _L = np.zeros((n_y, n_batch_u))
+            _L = np.zeros((n_y, int(n_batch_u)))
             gv_unlabeled = {i: 0 for i in v}
             gw_unlabeled = {i: 0 for i in w}
             for label in range(n_y):
-                new_y = np.zeros((n_y, n_batch_u))
+                new_y = np.zeros((n_y, int(n_batch_u)))
                 new_y[label,:] = 1
                 eps = eps_minibatch_u[label]
                 #logpx, logpz, logqz, _gv, _gw = model.dL_dw(v, w, {'x':x_minibatch['x'],'y':new_y}, eps)
@@ -281,7 +281,7 @@ def optim_vae_ss_adam(alpha, model_qy, model, x_labeled, x_unlabeled, n_y, u_ini
             L_unweighted, L_weighted, gv_unlabeled, gw_unlabeled = model.dL_weighted_dw(v, w, {'x':_x,'y':_y}, eps, py.reshape((1, -1)))
             _L = L_unweighted.reshape((n_y, n_batch_u))
         
-        r = f_du(*([x_minibatch_u['x']] + u.values() + [np.zeros((1, n_batch_u)), _L]))
+        r = f_du(*([x_minibatch_u['x']] + list(u.values()) + [np.zeros((1, int(n_batch_u))), _L]))
         L_unlabeled = r[0]
         gu_unlabeled = dict(zip(u.keys(), r[1:]))
         
