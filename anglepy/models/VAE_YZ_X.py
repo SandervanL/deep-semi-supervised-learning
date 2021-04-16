@@ -160,27 +160,27 @@ class VAE_YZ_X(ap.VAEModel):
         _z = {}
 
         # If x['x'] and x['y'] were given but not z['z']: generate z ~ q(z|x)
-        if x.has_key('x') and x.has_key('y') and not z.has_key('z'):
+        if 'x'in x and 'y' in x and 'z' not in z:
 
             q_mean, q_logvar = self.dist_qz['z'](*([x['x'], x['y']] + list(v.values()) + [A]))
             _z['mean'] = q_mean
             _z['logvar'] = q_logvar
             
             # Require epsilon
-            if not z.has_key('eps'):
+            if 'eps' not in z:
                 z['eps'] = self.gen_eps(n_batch)['eps']
             
             z['z'] = q_mean + np.exp(0.5 * q_logvar) * z['eps']
             
         else:
-            if not z.has_key('z'):
+            if 'z' not in z:
                 if self.type_pz in ['gaussian','gaussianmarg']:
                     z['z'] = np.random.standard_normal(size=(self.n_z, n_batch))
                 elif self.type_pz == 'laplace':
                     z['z'] = np.random.laplace(size=(self.n_z, n_batch))
                 elif self.type_pz == 'studentt':
                     z['z'] = np.random.standard_t(np.dot(np.exp(w['logv']), A))
-            if not x.has_key('y'):
+            if 'y' not in x:
                 py = self.dist_px['y'](*(list(w.values()) + [A]))
                 _z['y'] = py
                 x['y'] = np.zeros(py.shape)
@@ -193,12 +193,12 @@ class VAE_YZ_X(ap.VAEModel):
         if self.type_px == 'bernoulli':
             p = self.dist_px['x'](*([x['y'], z['z']] + list(w.values()) + [A]))
             _z['x'] = p
-            if not x.has_key('x'):
+            if 'x' not in x:
                 x['x'] = np.random.binomial(n=1,p=p)
         elif self.type_px == 'sigmoidgaussian' or self.type_px == 'gaussian':
             x_mean, x_logvar = self.dist_px['x'](*([x['y'], z['z']] + list(w.values()) + [A]))
             _z['x'] = x_mean
-            if not x.has_key('x'):
+            if 'x' not in x:
                 x['x'] = np.random.normal(x_mean, np.exp(x_logvar/2))
                 if self.type_px == 'sigmoidgaussian':
                     x['x'] = np.maximum(np.zeros(x['x'].shape), x['x'])

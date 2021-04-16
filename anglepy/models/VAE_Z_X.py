@@ -166,19 +166,19 @@ class VAE_Z_X(ap.VAEModel):
         _z = {}
 
         # If x['x'] was given but not z['z']: generate z ~ q(z|x)
-        if x.has_key('x') and not z.has_key('z'):
+        if 'x' in x and 'z' not in z:
 
             q_mean, q_logvar = self.dist_qz['z'](*([x['x']] + list(v.values()) + [A]))
             _z['mean'] = q_mean
             _z['logvar'] = q_logvar
             
             # Require epsilon
-            if not z.has_key('eps'):
+            if 'eps' not in z:
                 z['eps'] = self.gen_eps(n_batch)['eps']
             
             z['z'] = q_mean + np.exp(0.5 * q_logvar) * z['eps']
             
-        elif not z.has_key('z'):
+        elif 'z' not in z:
             if self.type_pz in ['gaussian','gaussianmarg']:
                 z['z'] = np.random.standard_normal(size=(self.n_z, n_batch))
             elif self.type_pz == 'laplace':
@@ -191,12 +191,12 @@ class VAE_Z_X(ap.VAEModel):
         if self.type_px == 'bernoulli':
             p = self.dist_px['x'](*([z['z']] + list(w.values()) + [A]))
             _z['x'] = p
-            if not x.has_key('x'):
+            if 'x' not in x:
                 x['x'] = np.random.binomial(n=1,p=p)
         elif self.type_px == 'bounded01' or self.type_px == 'gaussian':
             x_mean, x_logvar = self.dist_px['x'](*([z['z']] + list(w.values()) + [A]))
             _z['x'] = x_mean
-            if not x.has_key('x'):
+            if 'x' not in x:
                 x['x'] = np.random.normal(x_mean, np.exp(x_logvar/2))
                 if self.type_px == 'bounded01':
                     x['x'] = np.maximum(np.zeros(x['x'].shape), x['x'])

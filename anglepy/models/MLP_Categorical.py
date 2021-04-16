@@ -62,7 +62,7 @@ class MLP_Categorical(ap.BNModel):
         return logpw, logpx, logpz
         
     def gen_xz(self, w, x, z, n_batch=0):
-        if not x.has_key('x'):
+        if 'x' not in x:
             raise Exception('Not implemented')
         
         if n_batch == 0:
@@ -70,7 +70,7 @@ class MLP_Categorical(ap.BNModel):
         A = np.ones((1, n_batch))
         
         _z = {}
-        if not x.has_key('y'):
+        if 'y' not in x:
             w = ndict.ordered(w)
             py = self.dist_px['y'](*([x['x']] + list(w.values()) + [A]))
             _z['py'] = py
