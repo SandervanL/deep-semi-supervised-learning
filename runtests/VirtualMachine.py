@@ -85,7 +85,7 @@ class VirtualMachine():
                 "os_profile": {
                     "computer_name": virtual_machine_name,
                     "admin_username": username,
-                    # "admin_password": password
+                    "admin_password": password
                 },
                 "network_profile": {
                     "network_interfaces": [{
@@ -107,13 +107,14 @@ class VirtualMachine():
     def close_ssh(self):
         self.ssh.close()
 
-    def open_ssh(self):
+    def open_ssh(self, private_key_path: str):
         self.ssh = paramiko.SSHClient()
         self.ssh.load_system_host_keys()
         self.ssh.set_missing_host_key_policy(paramiko.WarningPolicy())
+        pk = paramiko.RSAKey.from_private_key(open(private_key_path))
         for i in range(3):
             try:
-                self.ssh.connect(self.ip.ip_address, port=22, username=self.username, password=self.password)
+                self.ssh.connect(self.ip.ip_address, port=22, username=self.username, password=self.password, pkey=pk)
                 break
             except Exception as e:
                 print(e)
@@ -132,5 +133,5 @@ class VirtualMachine():
                 print("Socket timeout")
 
     def run_test(self, n_labels: int, n_hidden: int):
-        self.run_command(f"tmux -d -s training 'python ~/deep-semi-supervised-learning/run_2layer_ssl {n_labels} 1000 {n_hidden}'")
-        system(f"start cmd /K ssh sander_tud@{self.ip.ip_address} 'tmux attach-session -t training'")
+        self.run_command(f'tmux new-session -d -s training \'cd ~/deep-semi-supervised-learning && export ML_DATA_PATH="$HOME/deep-semi-supervised-learning/data" && export PATH="$HOME/anaconda3/condabin:$PATH" && conda create -n deeplearning python=3.8 -y && conda activate deeplearning && conda install numpy matplotlib theano scipy -yconda activate deeplearning && conda install numpy matplotlib theano scipy -y && python ~/deep-semi-supervised-learning/run_2layer_ssl.py {n_labels} 1000 {n_hidden}\'')
+        system(f"start cmd /K ssh -i C:\\Users\\sande\\.ssh\\azure_deeplearning.pub sander_tud@{self.ip.ip_address} 'tmux attach-session -t training'")

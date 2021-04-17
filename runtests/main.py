@@ -1,7 +1,9 @@
 # Retrieve subscription ID from environment variable.
 from dataclasses import dataclass
 from typing import List, Optional
-from os import environ, system
+from os import environ
+
+from azure.identity import ClientSecretCredential
 
 from runtests.CredentialWrapper import CredentialWrapper
 from runtests.ExecutionEnvironment import ExecutionEnvironment
@@ -64,6 +66,7 @@ locations = [
     'japaneast',
     'northuk',
     'centralkorea',
+    'westus',
 ]
 
 with open('start_server_project.sh') as file:
@@ -75,13 +78,18 @@ with open('start_server_conda.sh') as file:
 with open('C:\\Users\\sande\\.ssh\\azure_deeplearning.pub') as file:
     ssh_public_key = file.read()
 
+ssh_private_key_path = 'C:\\Users\\sande\\.ssh\\azure_deeplearning'
+
 print("Loaded SSH public key & init scripts.")
 
-# test_configs = [TestConfig(n_labels, 300) for n_labels in [100, 600, 1000, 3000]] + \
-#               [TestConfig(600, n_hidden) for n_hidden in [100, 300, 600, 1000]]
-test_configs = [TestConfig(100, 500)]
+test_configs = [TestConfig(n_labels, 300) for n_labels in [100, 600, 1000, 3000] for _ in range(2)]
+              # [TestConfig(600, n_hidden) for n_hidden in [100, 300, 600, 1000]]
+# test_configs = [TestConfig(100, 500)]
 
 virtual_machines: List[Optional[VirtualMachine]] = [None]
+
+with open('machines.csv', 'w') as file:
+    file.write('region,n_labels,n_hidden,ip')
 
 for i, test_config in enumerate(test_configs):
     for execution_env in execution_envs:
@@ -90,6 +98,8 @@ for i, test_config in enumerate(test_configs):
 
         print(f"Creating IP address.")
         virtual_machine.set_ip(f'deep-learning-{test_config.n_labels}-{test_config.n_hidden}-ip')
+        with open('machines.csv', 'a') as file:
+            file.write(f"{locations[i]},{test_config.n_labels},{test_config.n_hidden},{virtual_machine.ip.ip_address}")
 
         print(f"Creating IP config.")
         virtual_machine.set_network_interface(f'deep-learning-{test_config.n_labels}-{test_config.n_hidden}-ipconfig')
@@ -103,14 +113,14 @@ for i, test_config in enumerate(test_configs):
         )
 
         print(f"Opening SSH connection.")
-        virtual_machine.open_ssh()
+        virtual_machine.open_ssh(ssh_private_key_path)
 
         print(f"Running first init script.")
         virtual_machine.run_command(first_init_script)
 
         print("Reopening SSH connection.")
         virtual_machine.close_ssh()
-        virtual_machine.open_ssh()
+        virtual_machine.open_ssh(ssh_private_key_path)
 
         print(f"Running second init script.")
         virtual_machine.run_command(second_init_script)
@@ -119,6 +129,3 @@ for i, test_config in enumerate(test_configs):
         virtual_machine.run_test(test_config.n_labels, test_config.n_hidden)
 
         virtual_machines[i] = virtual_machine
-
-import time
-time.sleep(3 * 24 * 3600)
