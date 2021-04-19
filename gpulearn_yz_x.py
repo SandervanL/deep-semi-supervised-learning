@@ -1,3 +1,11 @@
+import os
+import numpy as np
+import scipy.stats
+from numpy.compat import basestring
+
+import anglepy.paramgraphics as paramgraphics
+import anglepy.ndict as ndict
+from PIL import Image
 import math
 import numpy as np
 import os
@@ -163,7 +171,6 @@ def main(n_z, n_hidden, dataset, seed, gfx=True, _size=None):
                         type_qz='gaussianmarg', type_pz='gaussianmarg', prior_sd=1, uniform_y=True)
 
     if False:
-        dir = '/home/ubuntu/results/gpulearn_yz_x_svhn_300-(500, 500)-1414094291/'
         dir = '/home/ubuntu/results/gpulearn_yz_x_svhn_300-(500, 500)-1414163488/'
         w = ndict.loadz(dir + 'w_best.ndict.tar.gz')
         v = ndict.loadz(dir + 'v_best.ndict.tar.gz')
