@@ -8,18 +8,23 @@ from anglepy.misc import lazytheanofunc
 
 import math, inspect
 
-#import theano.sandbox.cuda.rng_curand as rng_curand
+
+# import theano.sandbox.cuda.rng_curand as rng_curand
 
 def shared32(x, name=None, borrow=False):
     return theano.shared(np.asarray(x, dtype='float32'), name=name, borrow=borrow)
+
 
 '''
 Fully connected deep variational auto-encoder (VAE_Z_X)
 '''
 
+
 class GPUVAE_Z_X(ap.GPUVAEModel):
 
-    def __init__(self, get_optimizer, n_x, n_hidden_q, n_z, n_hidden_p, nonlinear_q='tanh', nonlinear_p='tanh', type_px='bernoulli', type_qz='gaussianmarg', type_pz='gaussianmarg', prior_sd=1, init_sd=1e-2, var_smoothing=0, n_mixture=50):
+    def __init__(self, get_optimizer, n_x, n_hidden_q, n_z, n_hidden_p, nonlinear_q='tanh', nonlinear_p='tanh',
+                 type_px='bernoulli', type_qz='gaussianmarg', type_pz='gaussianmarg', prior_sd=1, init_sd=1e-2,
+                 var_smoothing=0, n_mixture=50):
         self.constr = (__name__, inspect.stack()[0][3], locals())
         self.n_x = n_x
         self.n_hidden_q = n_hidden_q
@@ -67,29 +72,37 @@ class GPUVAE_Z_X(ap.GPUVAEModel):
         # Compute q(z|x)
         hidden_q = [x['x']]
 
-        def f_softplus(x): return T.log(T.exp(x) + 1)# - np.log(2)
-        def f_rectlin(x): return x*(x>0)
-        def f_rectlin2(x): return x*(x>0) + 0.01 * x
-        nonlinear = {'tanh': T.tanh, 'sigmoid': T.nnet.sigmoid, 'softplus': f_softplus, 'rectlin': f_rectlin, 'rectlin2': f_rectlin2}
+        def f_softplus(x):
+            return T.log(T.exp(x) + 1)  # - np.log(2)
+
+        def f_rectlin(x):
+            return x * (x > 0)
+
+        def f_rectlin2(x):
+            return x * (x > 0) + 0.01 * x
+
+        nonlinear = {'tanh': T.tanh, 'sigmoid': T.nnet.sigmoid, 'softplus': f_softplus, 'rectlin': f_rectlin,
+                     'rectlin2': f_rectlin2}
         nonlinear_q = nonlinear[self.nonlinear_q]
         nonlinear_p = nonlinear[self.nonlinear_p]
 
-        #rng = rng_curand.CURAND_RandomStreams(0)
+        # rng = rng_curand.CURAND_RandomStreams(0)
         import theano.tensor.shared_randomstreams
         rng = theano.tensor.shared_randomstreams.RandomStreams(0)
 
         # TOTAL HACK
-        #hidden_q.append(nonlinear_q(T.dot(v['scale0'], A) * T.dot(w['out_w'].T, hidden_q[-1]) + T.dot(v['b0'], A)))
-        #hidden_q.append(nonlinear_q(T.dot(v['scale1'], A) * T.dot(w['w1'].T, hidden_q[-1]) + T.dot(v['b1'], A)))
+        # hidden_q.append(nonlinear_q(T.dot(v['scale0'], A) * T.dot(w['out_w'].T, hidden_q[-1]) + T.dot(v['b0'], A)))
+        # hidden_q.append(nonlinear_q(T.dot(v['scale1'], A) * T.dot(w['w1'].T, hidden_q[-1]) + T.dot(v['b1'], A)))
         for i in range(len(self.n_hidden_q)):
-            hidden_q.append(nonlinear_q(T.dot(v['w'+str(i)], hidden_q[-1]) + T.dot(v['b'+str(i)], A)))
+            hidden_q.append(nonlinear_q(T.dot(v['w' + str(i)], hidden_q[-1]) + T.dot(v['b' + str(i)], A)))
             if self.dropout:
                 hidden_q[-1] *= 2. * (rng.uniform(size=hidden_q[-1].shape, dtype='float32') > .5)
 
         q_mean = T.dot(v['mean_w'], hidden_q[-1]) + T.dot(v['mean_b'], A)
         if self.type_qz == 'gaussian' or self.type_qz == 'gaussianmarg':
             q_logvar = T.dot(v['logvar_w'], hidden_q[-1]) + T.dot(v['logvar_b'], A)
-        else: raise Exception()
+        else:
+            raise Exception()
 
         # function for distribution q(z|x)
         theanofunc = lazytheanofunc('warn', mode='FAST_RUN')
@@ -102,7 +115,7 @@ class GPUVAE_Z_X(ap.GPUVAEModel):
         # Compute log p(x|z)
         hidden_p = [_z]
         for i in range(len(self.n_hidden_p)):
-            hidden_p.append(nonlinear_p(T.dot(w['w'+str(i)], hidden_p[-1]) + T.dot(w['b'+str(i)], A)))
+            hidden_p.append(nonlinear_p(T.dot(w['w' + str(i)], hidden_p[-1]) + T.dot(w['b' + str(i)], A)))
             if self.dropout:
                 hidden_p[-1] *= 2. * (rng.uniform(size=hidden_p[-1].shape, dtype='float32') > .5)
 
@@ -121,22 +134,24 @@ class GPUVAE_Z_X(ap.GPUVAEModel):
             _logpx = ap.logpdfs.normal2(x['x'], x_mean, x_logvar)
             # Make it a mixture between uniform and Gaussian
             w_unif = T.nnet.sigmoid(T.dot(w['out_unif'], A))
-            _logpx = T.log(w_unif + (1-w_unif) * T.exp(_logpx))
+            _logpx = T.log(w_unif + (1 - w_unif) * T.exp(_logpx))
             self.dist_px['x'] = theanofunc([_z] + [A], [x_mean, x_logvar])
-        else: raise Exception("")
+        else:
+            raise Exception("")
 
         # Note: logpx is a row vector (one element per sample)
-        logpx = T.dot(shared32(np.ones((1, self.n_x))), _logpx) # logpx = log p(x|z,w)
+        logpx = T.dot(shared32(np.ones((1, self.n_x))), _logpx)  # logpx = log p(x|z,w)
 
         # log p(z) (prior of z)
         if self.type_pz == 'gaussianmarg':
-            logpz = -0.5 * (np.log(2 * np.pi) + (q_mean**2 + T.exp(q_logvar))).sum(axis=0, keepdims=True)
+            logpz = -0.5 * (np.log(2 * np.pi) + (q_mean ** 2 + T.exp(q_logvar))).sum(axis=0, keepdims=True)
         elif self.type_pz == 'gaussian':
             logpz = ap.logpdfs.standard_normal(_z).sum(axis=0, keepdims=True)
         elif self.type_pz == 'mog':
             pz = 0
             for i in range(self.n_mixture):
-                pz += T.exp(ap.logpdfs.normal2(_z, T.dot(w['mog_mean'+str(i)], A), T.dot(w['mog_logvar'+str(i)], A)))
+                pz += T.exp(
+                    ap.logpdfs.normal2(_z, T.dot(w['mog_mean' + str(i)], A), T.dot(w['mog_logvar' + str(i)], A)))
             logpz = T.log(pz).sum(axis=0, keepdims=True) - self.n_z * np.log(float(self.n_mixture))
         elif self.type_pz == 'laplace':
             logpz = ap.logpdfs.standard_laplace(_z).sum(axis=0, keepdims=True)
@@ -150,13 +165,14 @@ class GPUVAE_Z_X(ap.GPUVAEModel):
             logqz = - 0.5 * (np.log(2 * np.pi) + 1 + q_logvar).sum(axis=0, keepdims=True)
         elif self.type_qz == 'gaussian':
             logqz = ap.logpdfs.normal2(_z, q_mean, q_logvar).sum(axis=0, keepdims=True)
-        else: raise Exception()
+        else:
+            raise Exception()
 
         # [new part] Fisher divergence of latent variables
         if self.var_smoothing > 0:
-            dlogq_dz = T.grad(logqz.sum(), _z) # gives error when using gaussianmarg instead of gaussian
+            dlogq_dz = T.grad(logqz.sum(), _z)  # gives error when using gaussianmarg instead of gaussian
             dlogp_dz = T.grad((logpx + logpz).sum(), _z)
-            FD = 0.5 * ((dlogq_dz - dlogp_dz)**2).sum(axis=0, keepdims=True)
+            FD = 0.5 * ((dlogq_dz - dlogp_dz) ** 2).sum(axis=0, keepdims=True)
             # [end new part]
             logqz -= self.var_smoothing * FD
 
@@ -200,7 +216,7 @@ class GPUVAE_Z_X(ap.GPUVAEModel):
             z['z'] = q_mean + np.exp(0.5 * q_logvar) * eps
 
         elif 'z' not in z:
-            if self.type_pz in ['gaussian','gaussianmarg']:
+            if self.type_pz in ['gaussian', 'gaussianmarg']:
                 z['z'] = np.random.standard_normal(size=(self.n_z, n_batch)).astype(np.float32)
             elif self.type_pz == 'laplace':
                 z['z'] = np.random.laplace(size=(self.n_z, n_batch)).astype(np.float32)
@@ -208,8 +224,8 @@ class GPUVAE_Z_X(ap.GPUVAEModel):
                 z['z'] = np.random.standard_t(np.dot(np.exp(self.w['logv'].get_value()), A)).astype(np.float32)
             elif self.type_pz == 'mog':
                 i = np.random.randint(self.n_mixture)
-                loc = np.dot(self.w['mog_mean'+str(i)].get_value(), A)
-                scale = np.dot(np.exp(.5*self.w['mog_logvar'+str(i)].get_value()), A)
+                loc = np.dot(self.w['mog_mean' + str(i)].get_value(), A)
+                scale = np.dot(np.exp(.5 * self.w['mog_logvar' + str(i)].get_value()), A)
                 z['z'] = np.random.normal(loc=loc, scale=scale).astype(np.float32)
             else:
                 raise Exception('Unknown type_pz')
@@ -219,17 +235,18 @@ class GPUVAE_Z_X(ap.GPUVAEModel):
             p = self.dist_px['x'](*([z['z']] + [A]))
             _z['x'] = p
             if 'x' not in x:
-                x['x'] = np.random.binomial(n=1,p=p)
+                x['x'] = np.random.binomial(n=1, p=p)
         elif self.type_px == 'bounded01' or self.type_px == 'gaussian':
             x_mean, x_logvar = self.dist_px['x'](*([z['z']] + [A]))
             _z['x'] = x_mean
             if 'x' not in x:
-                x['x'] = np.random.normal(x_mean, np.exp(x_logvar/2))
+                x['x'] = np.random.normal(x_mean, np.exp(x_logvar / 2))
                 if self.type_px == 'bounded01':
                     x['x'] = np.maximum(np.zeros(x['x'].shape), x['x'])
                     x['x'] = np.minimum(np.ones(x['x'].shape), x['x'])
 
-        else: raise Exception("")
+        else:
+            raise Exception("")
 
         return x, z, _z
 
@@ -250,18 +267,18 @@ class GPUVAE_Z_X(ap.GPUVAEModel):
             return np.random.normal(0, std, size=size)
 
         v = {}
-        #v['scale0'] = np.ones((self.n_hidden_q[0], 1))
-        #v['scale1'] = np.ones((self.n_hidden_q[0], 1))
+        # v['scale0'] = np.ones((self.n_hidden_q[0], 1))
+        # v['scale1'] = np.ones((self.n_hidden_q[0], 1))
 
         v['w0'] = rand((self.n_hidden_q[0], self.n_x))
         v['b0'] = rand((self.n_hidden_q[0], 1))
         for i in range(1, len(self.n_hidden_q)):
-            v['w'+str(i)] = rand((self.n_hidden_q[i], self.n_hidden_q[i-1]))
-            v['b'+str(i)] = rand((self.n_hidden_q[i], 1))
+            v['w' + str(i)] = rand((self.n_hidden_q[i], self.n_hidden_q[i - 1]))
+            v['b' + str(i)] = rand((self.n_hidden_q[i], 1))
 
         v['mean_w'] = rand((self.n_z, self.n_hidden_q[-1]))
         v['mean_b'] = rand((self.n_z, 1))
-        if self.type_qz in ['gaussian','gaussianmarg']:
+        if self.type_qz in ['gaussian', 'gaussianmarg']:
             v['logvar_w'] = np.zeros((self.n_z, self.n_hidden_q[-1]))
         v['logvar_b'] = np.zeros((self.n_z, 1))
 
@@ -269,18 +286,17 @@ class GPUVAE_Z_X(ap.GPUVAEModel):
 
         if self.type_pz == 'mog':
             for i in range(self.n_mixture):
-                w['mog_mean'+str(i)] = rand((self.n_z, 1))
-                w['mog_logvar'+str(i)] = rand((self.n_z, 1))
+                w['mog_mean' + str(i)] = rand((self.n_z, 1))
+                w['mog_logvar' + str(i)] = rand((self.n_z, 1))
         if self.type_pz == 'studentt':
             w['logv'] = np.zeros((self.n_z, 1))
-
 
         if len(self.n_hidden_p) > 0:
             w['w0'] = rand((self.n_hidden_p[0], self.n_z))
             w['b0'] = rand((self.n_hidden_p[0], 1))
             for i in range(1, len(self.n_hidden_p)):
-                w['w'+str(i)] = rand((self.n_hidden_p[i], self.n_hidden_p[i-1]))
-                w['b'+str(i)] = rand((self.n_hidden_p[i], 1))
+                w['w' + str(i)] = rand((self.n_hidden_p[i], self.n_hidden_p[i - 1]))
+                w['b' + str(i)] = rand((self.n_hidden_p[i], 1))
             w['out_w'] = rand((self.n_x, self.n_hidden_p[-1]))
             w['out_b'] = np.zeros((self.n_x, 1))
             if self.type_px == 'gaussian':

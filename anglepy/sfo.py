@@ -181,9 +181,9 @@ class SFO(object):
 
         if self.N < 25 and self.display > 0:
             print(
-                    "\nIn experiments, performance suffered when the data was broken up into fewer\n"
-                    "than 25 minibatches.  See Figure 2c in SFO paper.\n"
-                    "You may want to use more than the current %d minibatches.\n" % (self.N))
+                "\nIn experiments, performance suffered when the data was broken up into fewer\n"
+                "than 25 minibatches.  See Figure 2c in SFO paper.\n"
+                "You may want to use more than the current %d minibatches.\n" % (self.N))
 
     def optimize(self, num_passes=10, num_steps=None):
         """
@@ -194,7 +194,7 @@ class SFO(object):
         This, __init__, and check_grad are the only three functions that should be called by
         the user
         """
-        if num_steps == None:
+        if num_steps is None:
             num_steps = int(num_passes * self.N)
         for i in range(num_steps):
             if self.display > 1:
@@ -360,7 +360,7 @@ class SFO(object):
         self.P[:, :self.K_current] = Porth
         # Pl is the projection matrix from old to new basis.  apply it to all the history
         # terms
-        self.apply_subspace_transformation(Pl.T, Pl);
+        self.apply_subspace_transformation(Pl.T, Pl)
 
     def collapse_subspace(self, xl=None):
         """
@@ -381,7 +381,7 @@ class SFO(object):
         # initialize it with random noise, so that it still spans K_min
         # dimensions even if not all the subfunctions are active yet
         yy = random.randn(self.K_max, self.K_min)
-        if xl == None:
+        if xl is None:
             xl = random.randn(self.K_max, 1)
         # the most recent position and gradient for all active subfunctions,
         # as well as the current position and gradient (which will not be saved in the history yet)
@@ -400,7 +400,7 @@ class SFO(object):
         self.K_current = self.K_min
 
         # re-orthogonalize the subspace if it's accumulated small errors
-        self.reorthogonalize_subspace();
+        self.reorthogonalize_subspace()
 
     def update_subspace(self, x_in):
         """
@@ -505,7 +505,7 @@ class SFO(object):
                 if self.display > 3:
                     print("subf ||dtheta|| {0}, subf ||ddf|| {1}, corr(ddf,dtheta) {2},".format(lddt, lddf,
                                                                                                 sum(ddt * ddf) / (
-                                                                                                            lddt * lddf))),
+                                                                                                        lddt * lddf))),
 
                 # shift the history by one timestep
                 self.hist_deltatheta[:, 1:, indx] = self.hist_deltatheta[:, :-1, indx]
