@@ -181,9 +181,9 @@ class SFO(object):
 
         if self.N < 25 and self.display > 0:
             print(
-                    "\nIn experiments, performance suffered when the data was broken up into fewer\n"
-                    "than 25 minibatches.  See Figure 2c in SFO paper.\n"
-                    "You may want to use more than the current %d minibatches.\n" % (self.N))
+                "\nIn experiments, performance suffered when the data was broken up into fewer\n"
+                "than 25 minibatches.  See Figure 2c in SFO paper.\n"
+                "You may want to use more than the current %d minibatches.\n" % (self.N))
 
     def optimize(self, num_passes=10, num_steps=None):
         """
@@ -194,7 +194,7 @@ class SFO(object):
         This, __init__, and check_grad are the only three functions that should be called by
         the user
         """
-        if num_steps == None:
+        if num_steps is None:
             num_steps = int(num_passes * self.N)
         for i in range(num_steps):
             if self.display > 1:
@@ -209,15 +209,15 @@ class SFO(object):
                                                                                                mean(self.hist_f[
                                                                                                         self.eval_count > 0, 0])))
         if num_steps < 1:
-            print "No optimization steps performed.  Change num_passes or num_steps."
+            print("No optimization steps performed.  Change num_passes or num_steps.")
         elif self.display > 0:
             print("active {0}/{1}, pass #{2}, sfo {3} s, func {4} s, <f> {5}".format(sum(self.active),
                                                                                      self.active.shape[0], float(
                     sum(self.eval_count)) / self.N, self.time_pass - self.time_func, self.time_func, mean(
                     self.hist_f[self.eval_count > 0, 0])))
             if (self.time_pass - self.time_func) > self.time_func and self.N >= 25 and self.time_pass > 60:
-                print "More time was spent in SFO than the objective function."
-                print "You may want to consider breaking your data into fewer minibatches to reduce overhead."
+                print("More time was spent in SFO than the objective function.")
+                print("You may want to consider breaking your data into fewer minibatches to reduce overhead.")
 
         # reverse the flattening transformation on theta
         return self.theta_flat_to_original(self.theta)
@@ -236,14 +236,14 @@ class SFO(object):
         if small_diff is None:
             # step size to use for gradient check
             small_diff = self.eps * 1e6
-        print "Testing step size %g" % small_diff
+        print("Testing step size %g" % small_diff)
 
-        for i in random.permutation(range(self.N)):
+        for i in random.permutation(list(range(self.N))):
             fl, dfl = self.f_df_wrapper(self.theta, i, return_full=True)
             ep = zeros((self.M, 1))
             dfl_obs = zeros((self.M, 1))
             dfl_err = zeros((self.M, 1))
-            for j in random.permutation(range(self.M)):
+            for j in random.permutation(list(range(self.M))):
                 ep[j] = small_diff
                 fl2, _ = self.f_df_wrapper(self.theta + ep, i, return_full=True)
                 dfl_obs[j] = (fl2 - fl) / small_diff
@@ -282,7 +282,7 @@ class SFO(object):
                 new_reference could for instance hold a new minibatch of training data.
         """
 
-        if not new_reference is None:
+        if new_reference is not None:
             # if a new one has been supplied, then
             # replace the reference for this subfunction
             self.sub_ref[idx] = new_reference
@@ -336,9 +336,9 @@ class SFO(object):
         # # project low dimensional representation of current theta in to new subspace
         # self.theta_proj = dot(T_left, self.theta_proj)
 
-        ## To avoid slow accumulation of numerical errors, recompute full_H
-        ## and theta_proj when the subspace is collapsed.  Should not be a
-        ## leading time cost.
+        # To avoid slow accumulation of numerical errors, recompute full_H
+        # and theta_proj when the subspace is collapsed.  Should not be a
+        # leading time cost.
         # theta projected into current working subspace
         self.theta_proj = dot(self.P.T, self.theta)
         # full approximate hessian
@@ -360,7 +360,7 @@ class SFO(object):
         self.P[:, :self.K_current] = Porth
         # Pl is the projection matrix from old to new basis.  apply it to all the history
         # terms
-        self.apply_subspace_transformation(Pl.T, Pl);
+        self.apply_subspace_transformation(Pl.T, Pl)
 
     def collapse_subspace(self, xl=None):
         """
@@ -381,7 +381,7 @@ class SFO(object):
         # initialize it with random noise, so that it still spans K_min
         # dimensions even if not all the subfunctions are active yet
         yy = random.randn(self.K_max, self.K_min)
-        if xl == None:
+        if xl is None:
             xl = random.randn(self.K_max, 1)
         # the most recent position and gradient for all active subfunctions,
         # as well as the current position and gradient (which will not be saved in the history yet)
@@ -400,7 +400,7 @@ class SFO(object):
         self.K_current = self.K_min
 
         # re-orthogonalize the subspace if it's accumulated small errors
-        self.reorthogonalize_subspace();
+        self.reorthogonalize_subspace()
 
     def update_subspace(self, x_in):
         """
@@ -505,7 +505,7 @@ class SFO(object):
                 if self.display > 3:
                     print("subf ||dtheta|| {0}, subf ||ddf|| {1}, corr(ddf,dtheta) {2},".format(lddt, lddf,
                                                                                                 sum(ddt * ddf) / (
-                                                                                                            lddt * lddf))),
+                                                                                                        lddt * lddf))),
 
                 # shift the history by one timestep
                 self.hist_deltatheta[:, 1:, indx] = self.hist_deltatheta[:, :-1, indx]
@@ -542,7 +542,9 @@ class SFO(object):
                     print("Subfunction evaluated %d times, but has no stored history." % self.eval_count[indx])
                 if sum(self.eval_count) < 5:
                     print(
-                        "You probably need to initialize SFO with a smaller hessian_init value.  Scaling down the Hessian to try to recover.  You're better off correcting the hessian_init value though!")
+                        "You probably need to initialize SFO with a smaller hessian_init value.  "
+                        "Scaling down the Hessian to try to recover.  "
+                        "You're better off correcting the hessian_init value though!")
                     self.min_eig_sub[indx] /= 10.
             return
 
@@ -551,8 +553,8 @@ class SFO(object):
         deltatheta_P = dot(P_hist.T, self.hist_deltatheta[:, gd, indx])
         deltadf_P = dot(P_hist.T, self.hist_deltadf[:, gd, indx])
 
-        ## get an approximation to the smallest eigenvalue.
-        ## This will be used as the diagonal initialization for BFGS.
+        # get an approximation to the smallest eigenvalue.
+        # This will be used as the diagonal initialization for BFGS.
         # calculate Hessian using pinv and squared equation.  just to get
         # smallest eigenvalue.
         # df = H dx
@@ -573,7 +575,9 @@ class SFO(object):
             H2w[:] = max(self.min_eig_sub[self.active])
             if self.display > 3:
                 print(
-                    "Ill-conditioned history of gradient changes.  This may be because your gradient is wrong or has poor numerical precision.  Try calling SFO.check_grad()."),
+                    "Ill-conditioned history of gradient changes.  "
+                    "This may be because your gradient is wrong or has poor numerical precision.  "
+                    "Try calling SFO.check_grad()."),
 
         self.min_eig_sub[indx] = min(H2w)
         self.max_eig_sub[indx] = max(H2w)
@@ -584,7 +588,7 @@ class SFO(object):
             if self.display > 3:
                 print("constraining Hessian initialization"),
 
-        ## recalculate Hessian
+        # recalculate Hessian
         # number of history terms
         num_hist = deltatheta_P.shape[1]
         # the new hessian will be dot(b_p, b_p.T) + eye()*self.min_eig_sub[indx]
@@ -839,7 +843,7 @@ class SFO(object):
             self.cyclic_subfunction_index %= sum(self.active)
             return indx
 
-        throw("unknown subfunction choice method")
+        raise Exception("unknown subfunction choice method")
 
     def handle_step_failure(self, f, df_proj, indx):
         """
@@ -885,8 +889,8 @@ class SFO(object):
             f_lastpos, df_lastpos_proj = self.f_df_wrapper(self.theta_prior_step, indx)
             df_lastpos = dot(self.P, df_lastpos_proj)
 
-            ## if the function value exploded, then back it off until it's a
-            ## reasonable order of magnitude before adding anything to the history
+            # if the function value exploded, then back it off until it's a
+            # reasonable order of magnitude before adding anything to the history
             f_pred = self.get_predicted_subf(indx, self.theta_proj)
             if isfinite(self.hist_f[indx, 0]):
                 predicted_f_diff = abs(f_pred - self.hist_f[indx, 0])
@@ -976,7 +980,7 @@ class SFO(object):
         """
         time_pass_start = time.time()
 
-        ## choose an index to update
+        # choose an index to update
         indx = self.get_target_index()
 
         if self.display > 2:
@@ -1003,7 +1007,7 @@ class SFO(object):
 
         # the current contribution from this subfunction to the total Hessian approximation
         H_pre_update = real(dot(self.b[:, :, indx], self.b[:, :, indx].T))
-        ## update this subfunction's Hessian estimate
+        # update this subfunction's Hessian estimate
         self.update_hessian(indx)
         # the new contribution from this subfunction to the total approximate hessian
         H_new = real(dot(self.b[:, :, indx], self.b[:, :, indx].T))
@@ -1035,7 +1039,7 @@ class SFO(object):
         #     ratio_scale = 10.
         #     if length_ratio > ratio_scale:
         #         if self.display > 3:
-        #             print "truncating step length from %g to %g"%(dtheta_proj_length, ratio_scale*avg_length),
+        #             print("truncating step length from %g to %g"%(dtheta_proj_length, ratio_scale*avg_length))
         #         dtheta_proj_length /= length_ratio/ratio_scale
         #         dtheta_proj /= length_ratio/ratio_scale
 
@@ -1050,7 +1054,7 @@ class SFO(object):
         # the predicted improvement from this update step
         self.f_predicted_total_improvement = 0.5 * dot(dtheta_proj.T, dot(full_H_combined, dtheta_proj))
 
-        ## expand the set of active subfunctions as appropriate
+        # expand the set of active subfunctions as appropriate
         self.expand_active_subfunctions(full_H_inv, step_failure)
 
         # record how much time was taken by this learning step

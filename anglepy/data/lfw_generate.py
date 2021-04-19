@@ -9,4 +9,3 @@ np.save('lfw_labels', lfw_people.target)
 # 'small' images (scale factor 0.25)
 lfw_people2 = fetch_lfw_people(color=True, resize=0.25)
 np.save('lfw_31x23', lfw_people2.images.astype('uint8'))
-
