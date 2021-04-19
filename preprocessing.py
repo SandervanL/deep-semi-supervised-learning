@@ -5,7 +5,8 @@ import anglepy.ndict as ndict
 # Pre-processing routines
 
 def PCA(x_in, cutoff=0.99, global_sd=True, toFloat=True):
-    if toFloat: x_in = x_in / 256.
+    if toFloat:
+        x_in = x_in / 256.
     x_center = x_in.mean(axis=1, keepdims=True)
     x = x_in - x_center
     if not global_sd:
@@ -53,7 +54,8 @@ def PCA_encdec(eigvec, eigval, x_center, x_sd, toFloat=False):
 
 
 def normalize_random(x, global_sd=True, toFloat=False):
-    if toFloat: x = x / 256.
+    if toFloat:
+        x = x / 256.
     x_center = x.mean(axis=1, keepdims=True)
     x = x - x_center
     if not global_sd:
@@ -65,13 +67,15 @@ def normalize_random(x, global_sd=True, toFloat=False):
     orth = np.dot(u, v)
 
     def f_enc(x):
-        if toFloat: x = x / 256.
+        if toFloat:
+            x = x / 256.
         result = orth.T.dot((x - x_center) / x_sd)
         return result
 
     def f_dec(x, bounded01=True):
         result = orth.dot(x) * x_sd + x_center
-        if bounded01: result = np.maximum(0, np.minimum(1, result))
+        if bounded01:
+            result = np.maximum(0, np.minimum(1, result))
         return result
 
     return f_enc, f_dec, {'orth': orth, 'center': x_center, 'sd': x_sd}
@@ -96,7 +100,8 @@ def normalize(x, global_sd=True):
 
 
 def normalize_noise(x, noise_sd=0.01, global_sd=True, toFloat=False):
-    if toFloat: x = x / 256.
+    if toFloat:
+        x = x / 256.
     x_center = x.mean(axis=1, keepdims=True)
     x = x - x_center
     if not global_sd:
@@ -106,13 +111,15 @@ def normalize_noise(x, noise_sd=0.01, global_sd=True, toFloat=False):
     x /= x_sd
 
     def f_enc(x):
-        if toFloat: x = x / 256.
+        if toFloat:
+            x = x / 256.
         result = (x - x_center) / x_sd
         return np.random.normal(loc=result, scale=noise_sd, size=result.shape)
 
     def f_dec(x, bounded01=True):
         result = x * x_sd + x_center
-        if bounded01: result = np.maximum(0, np.minimum(1, result))
+        if bounded01:
+            result = np.maximum(0, np.minimum(1, result))
         return result
 
     return f_enc, f_dec, (x_center, x_sd)

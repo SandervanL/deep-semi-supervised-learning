@@ -133,5 +133,13 @@ class VirtualMachine():
                 print("Socket timeout")
 
     def run_test(self, n_labels: int, n_hidden: int):
-        self.run_command(f'tmux new-session -d -s training \'cd ~/deep-semi-supervised-learning && export ML_DATA_PATH="$HOME/deep-semi-supervised-learning/data" && export PATH="$HOME/anaconda3/condabin:$PATH" && conda create -n deeplearning python=3.8 -y && conda activate deeplearning && conda install numpy matplotlib theano scipy -yconda activate deeplearning && conda install numpy matplotlib theano scipy -y && python ~/deep-semi-supervised-learning/run_2layer_ssl.py {n_labels} 1000 {n_hidden}\'')
-        system(f"start cmd /K ssh -i C:\\Users\\sande\\.ssh\\azure_deeplearning.pub sander_tud@{self.ip.ip_address} 'tmux attach-session -t training'")
+        self.run_command(f'tmux new-session -d -s training \'cd ~/deep-semi-supervised-learning '
+                         f'&& export ML_DATA_PATH="$HOME/deep-semi-supervised-learning/data" '
+                         f'&& export PATH="$HOME/anaconda3/condabin:$PATH" '
+                         f'&& conda create -n deeplearning python=3.8 -y '
+                         f'&& conda activate deeplearning '
+                         f'&& conda install numpy matplotlib theano scipy -yconda activate deeplearning '
+                         f'&& conda install numpy matplotlib theano scipy -y '
+                         f'&& python ~/deep-semi-supervised-learning/run_2layer_ssl.py {n_labels} 1000 {n_hidden}\'')
+        system(f"start cmd /K ssh -i C:\\Users\\sande\\.ssh\\azure_deeplearning.pub sander_tud@{self.ip.ip_address} "
+               f"'tmux attach-session -t training'")

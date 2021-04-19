@@ -41,7 +41,7 @@ def log_gamma_lanczos(z):
     return T.switch(z < 0.5, small, big)
 
 
-## version that isn't vectorised, since g is small anyway
+# version that isn't vectorised, since g is small anyway
 def log_gamma_lanczos_sub(z):  # expanded version
     # Coefficients used by the GNU Scientific Library
     g = 7
@@ -67,7 +67,7 @@ def log_gamma_lanczos_sub(z): #vectorised version
     
     zs = T.shape_padleft(z, 1) + T.shape_padright(T.arange(1, g+2), z.ndim)
     x = T.sum(T.shape_padright(p[1:], z.ndim) / zs, axis=0) + p[0]
-	t = z + g + 0.5
+    t = z + g + 0.5
     return np.log(np.sqrt(2*np.pi)) + (z + 0.5) * T.log(t) - t + T.log(x)
 '''
 

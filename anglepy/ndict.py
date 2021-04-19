@@ -163,20 +163,24 @@ def setShapes(d, shapes):
 
 
 def p(d):
-    for i in d: print(i + '\n', d[i])
+    for i in d:
+        print(i + '\n', d[i])
 
 
 def pNorm(d):
-    for i in d: print(i, numpy.linalg.norm(d[i]))
+    for i in d:
+        print(i, numpy.linalg.norm(d[i]))
 
 
 def pShape(d):
-    for i in d: print(i, d[i].shape)
+    for i in d:
+        print(i, d[i].shape)
 
 
 def hasNaN(d):
     result = False
-    for i in d: result = result or np.isnan(d[i]).any()
+    for i in d:
+        result = result or np.isnan(d[i]).any()
     return result
 
 
@@ -193,7 +197,8 @@ def set_value(d, d2):
 
 
 def savetext(d, name):
-    for i in d: np.savetxt('debug_' + name + '.txt', d[i])
+    for i in d:
+        np.savetxt('debug_' + name + '.txt', d[i])
 
 
 def ordered(d):
@@ -235,7 +240,8 @@ def savez(d, filename, addext=True):
     np.savez(filename + '.' + fname1, *_d.values())
     # Write keys (names of arrays)
     with open(filename + '.' + fname2, 'w') as thefile:
-        for key in _d.keys(): thefile.write("%s\n" % key)
+        for key in _d.keys():
+            thefile.write("%s\n" % key)
     # Write TAR file
     tar = tarfile.open(filename, "w:gz")
     for fname in [fname1, fname2]:

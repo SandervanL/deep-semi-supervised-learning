@@ -1,15 +1,14 @@
-import sys
-
-import os, numpy as np
-import scipy.stats
-import anglepy.paramgraphics as paramgraphics
-import anglepy.ndict as ndict
-from PIL import Image
 import math
+import numpy as np
+import os
 
+import scipy.stats
 import theano
 import theano.tensor as T
+from PIL import Image
 
+import anglepy.ndict as ndict
+import anglepy.paramgraphics as paramgraphics
 import preprocessing as pp
 
 
@@ -20,14 +19,15 @@ def main(n_z, n_hidden, dataset, seed, gfx=True, _size=None):
     """
     assert (type(n_hidden) == tuple or type(n_hidden) == list)
     assert type(n_z) == int
-    assert isinstance(dataset, basestring)
+    assert isinstance(dataset, str)
 
     print('gpulearn_yz_x', n_z, n_hidden, dataset, seed)
 
     import time
     logdir = 'results/gpulearn_yz_x_' + dataset + '_' + str(n_z) + '-' + str(n_hidden) + '-' + str(
         int(time.time())) + '/'
-    if not os.path.exists(logdir): os.makedirs(logdir)
+    if not os.path.exists(logdir):
+        os.makedirs(logdir)
     print('logdir:', logdir)
 
     np.random.seed(seed)
@@ -237,7 +237,6 @@ def main(n_z, n_hidden, dataset, seed, gfx=True, _size=None):
 
             if n_z == 2:
 
-                import ImageFont
                 import ImageDraw
 
                 n_width = 10
@@ -247,7 +246,8 @@ def main(n_z, n_hidden, dataset, seed, gfx=True, _size=None):
                 mosaic = Image.new("RGB", (submosaic_width * mosaic_w, submosaic_offset + submosaic_height * mosaic_h))
 
                 for digit in range(0, n_y):
-                    if digit >= mosaic_h * mosaic_w: continue
+                    if digit >= mosaic_h * mosaic_w:
+                        continue
 
                     _x = {}
                     n_batch_plot = n_width * n_width
@@ -310,8 +310,10 @@ def epoch_vae_adam(model, x, n_batch=100, convertImgs=False, bernoulli_x=False, 
             idx_to = min(n_tot, idx_from + n_batch)
             x_minibatch = ndict.getCols(x, idx_from, idx_to)
             idx_from += n_batch
-            if byteToFloat: x_minibatch['x'] = x_minibatch['x'].astype(np.float32) / 256.
-            if bernoulli_x: x_minibatch['x'] = np.random.binomial(n=1, p=x_minibatch['x']).astype(np.float32)
+            if byteToFloat:
+                x_minibatch['x'] = x_minibatch['x'].astype(np.float32) / 256.
+            if bernoulli_x:
+                x_minibatch['x'] = np.random.binomial(n=1, p=x_minibatch['x']).astype(np.float32)
 
             # Get gradient
             # raise Exception()

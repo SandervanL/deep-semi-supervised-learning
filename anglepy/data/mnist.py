@@ -122,8 +122,9 @@ def create_semisupervised(x, y, n_labeled):
     import random
     n_x = x[0].shape[0]
     n_classes = y[0].shape[0]
-    if n_labeled % n_classes != 0: raise (
-        "n_labeled (wished number of labeled samples) not divisible by n_classes (number of classes)")
+    if n_labeled % n_classes != 0:
+        raise (
+            "n_labeled (wished number of labeled samples) not divisible by n_classes (number of classes)")
     n_labels_per_class = int(n_labeled / n_classes)
     x_labeled = [0] * n_classes
     x_unlabeled = [0] * n_classes

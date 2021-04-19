@@ -49,7 +49,8 @@ class GPUVAEModel(object):
         if get_optimizer is None:
             def get_optimizer(w, g):
                 updates = {}
-                for i in w: updates[w[i]] = w[i]
+                for i in w:
+                    updates[w[i]] = w[i]
                 return updates
 
         # Log-likelihood lower bound
@@ -61,7 +62,8 @@ class GPUVAEModel(object):
         updates.update(get_optimizer(w, gw))
 
         # self.profmode = theano.ProfileMode(optimizer='fast_run', linker=theano.gof.OpWiseCLinker())
-        # self.f_evalAndUpdate = theano.function(allvars, [logpx + logpz - logqz], updates=updates_w, mode=self.profmode)
+        # self.f_evalAndUpdate = theano.function(allvars, [logpx + logpz - logqz],
+        # updates=updates_w, mode=self.profmode)
         # theano.printing.debugprint(self.f_evalAndUpdate)
 
         self.f_eval = theanofunction(allvars, [logpx + logpz - logqz])
@@ -134,7 +136,8 @@ class GPUVAEModel(object):
             while i < n_tot:
                 i_to = min(n_tot, i + n_batch)
                 _x = ndict.getCols(x, i, i_to)
-                if byteToFloat: _x = {i: _x[i].astype(np.float32) / 256. for i in _x}
+                if byteToFloat:
+                    _x = {i: _x[i].astype(np.float32) / 256. for i in _x}
                 _L = np.hstack((_L, self.eval(_x, {})))
                 i += n_batch
             lowbound += _L.mean()

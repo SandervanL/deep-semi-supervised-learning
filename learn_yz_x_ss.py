@@ -1,19 +1,13 @@
+import numpy as np
+import os
 import sys
-
-import os, numpy as np
-import scipy.stats
-
-import anglepy.paramgraphics as paramgraphics
-import anglepy.ndict as ndict
-
-from anglepy.sfo import SFO
-from adam import AdaM
 
 import theano
 import theano.tensor as T
 
+import anglepy.ndict as ndict
 import preprocessing as pp
-import time
+from adam import AdaM
 
 
 def main(n_passes, n_labeled, n_z, n_hidden, dataset, seed, alpha, n_minibatches, comment):
@@ -26,7 +20,8 @@ def main(n_passes, n_labeled, n_z, n_hidden, dataset, seed, alpha, n_minibatches
     import time
     logdir = 'results/learn_yz_x_ss_' + dataset + '_' + str(n_z) + '-' + str(n_hidden) + '_nlabeled' + str(
         n_labeled) + '_alpha' + str(alpha) + '_seed' + str(seed) + '_' + comment + '-' + str(int(time.time())) + '/'
-    if not os.path.exists(logdir): os.makedirs(logdir)
+    if not os.path.exists(logdir):
+        os.makedirs(logdir)
     print('logdir:', logdir)
 
     print(sys.argv[0], n_labeled, n_z, n_hidden, dataset, seed, comment)
@@ -108,7 +103,8 @@ def main(n_passes, n_labeled, n_z, n_hidden, dataset, seed, alpha, n_minibatches
         import anglepy.data.svhn as svhn
         size = 32
         train_x, train_y, valid_x, valid_y, test_x, test_y = svhn.load_numpy_split(False, binarize_y=True,
-                                                                                   extra=False)  # norb.load_resized(size, binarize_y=True)
+                                                                                   extra=False)
+        # norb.load_resized(size, binarize_y=True)
 
         # train_x = np.hstack((_train_x, extra_x))
         # train_y = np.hstack((_train_y, extra_y))[:,:604000]
@@ -205,11 +201,13 @@ def optim_vae_ss_adam(alpha, model_qy, model, x_labeled, x_unlabeled, n_y, u_ini
 
     n_labeled = next(iter(x_labeled.values())).shape[1]
     n_batch_l = n_labeled / n_minibatches
-    if (n_labeled % n_batch_l) != 0: raise Exception()
+    if (n_labeled % n_batch_l) != 0:
+        raise Exception()
 
     n_unlabeled = next(iter(x_unlabeled.values())).shape[1]
     n_batch_u = n_unlabeled / n_minibatches
-    if (n_unlabeled % n_batch_u) != 0: raise Exception()
+    if (n_unlabeled % n_batch_u) != 0:
+        raise Exception()
 
     n_tot = n_labeled + n_unlabeled
 
@@ -257,7 +255,8 @@ def optim_vae_ss_adam(alpha, model_qy, model, x_labeled, x_unlabeled, n_y, u_ini
         # Reweight gu_labeled and logqy
         # beta = alpha / (1.-alpha) * (1. * n_unlabeled / n_labeled) #old
         beta = alpha * (1. * n_tot / n_labeled)
-        for i in u: gu_labeled[i] *= beta
+        for i in u:
+            gu_labeled[i] *= beta
         logqy *= beta
 
         L_labeled = logpx + logpz - logqz + logqy
@@ -281,8 +280,10 @@ def optim_vae_ss_adam(alpha, model_qy, model, x_labeled, x_unlabeled, n_y, u_ini
                 L_unweighted, L_weighted, _gv, _gw = model.dL_weighted_dw(v, w, {'x': x_minibatch_u['x'], 'y': new_y},
                                                                           eps, py[label:label + 1, :])
                 _L[label:label + 1, :] = L_unweighted
-                for i in v: gv_unlabeled[i] += _gv[i]
-                for i in w: gw_unlabeled[i] += _gw[i]
+                for i in v:
+                    gv_unlabeled[i] += _gv[i]
+                for i in w:
+                    gw_unlabeled[i] += _gw[i]
         else:
             # New, should be more efficient. (But is not in practice)
             _y = np.zeros((n_y, n_batch_u * n_y))

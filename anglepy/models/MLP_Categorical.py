@@ -2,12 +2,13 @@ import theano
 import theano.tensor as T
 import numpy as np
 
-import sys
-
-sys.path.append('../../shared')
 import anglepy as ap
 from anglepy.misc import lazytheanofunc
 import anglepy.ndict as ndict
+
+import sys
+
+sys.path.append('../../shared')
 
 
 # Write anglepy model

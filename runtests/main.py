@@ -15,6 +15,7 @@ class TestConfig:
     n_labels: int
     n_hidden: int
 
+
 USERNAME = environ['AZURE_USER']
 PASSWORD = environ['AZURE_PWD']
 
@@ -83,7 +84,7 @@ ssh_private_key_path = 'C:\\Users\\sande\\.ssh\\azure_deeplearning'
 print("Loaded SSH public key & init scripts.")
 
 test_configs = [TestConfig(n_labels, 300) for n_labels in [100, 600, 1000, 3000] for _ in range(2)]
-              # [TestConfig(600, n_hidden) for n_hidden in [100, 300, 600, 1000]]
+# [TestConfig(600, n_hidden) for n_hidden in [100, 300, 600, 1000]]
 # test_configs = [TestConfig(100, 500)]
 
 virtual_machines: List[Optional[VirtualMachine]] = [None]
@@ -93,7 +94,8 @@ with open('machines.csv', 'w') as file:
 
 for i, test_config in enumerate(test_configs):
     for execution_env in execution_envs:
-        print(f"Creating Virtual Machine {i + 1} in {locations[i]} running {test_config.n_labels} labels and {test_config.n_hidden} hidden nodes.")
+        print(f"Creating Virtual Machine {i + 1} in {locations[i]} running {test_config.n_labels} "
+              f"labels and {test_config.n_hidden} hidden nodes.")
         virtual_machine = VirtualMachine(execution_env, locations[i])
 
         print(f"Creating IP address.")

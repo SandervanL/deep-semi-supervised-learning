@@ -1,19 +1,17 @@
+import numpy as np
+import os
 import sys
-
-sys.path.append('..')
-sys.path.append('../../data/')
-
-import os, numpy as np
 import time
-
-import anglepy as ap
-import anglepy.paramgraphics as paramgraphics
-import anglepy.ndict as ndict
 
 import theano
 import theano.tensor as T
 
+import anglepy.ndict as ndict
+import anglepy.paramgraphics as paramgraphics
 import preprocessing as pp
+
+sys.path.append('..')
+sys.path.append('../../data/')
 
 
 def main(n_z, n_hidden, dataset, seed, comment, gfx=True):
@@ -21,7 +19,8 @@ def main(n_z, n_hidden, dataset, seed, comment, gfx=True):
     import time
     logdir = 'results/gpulearn_z_x_' + dataset + '_' + str(n_z) + '-' + str(n_hidden) + '_' + comment + '_' + str(
         int(time.time())) + '/'
-    if not os.path.exists(logdir): os.makedirs(logdir)
+    if not os.path.exists(logdir):
+        os.makedirs(logdir)
     print('logdir:', logdir)
     print('gpulearn_z_x', n_z, n_hidden, dataset, seed)
     with open(logdir + 'hook.txt', 'a') as f:
@@ -275,7 +274,8 @@ def main(n_z, n_hidden, dataset, seed, comment, gfx=True):
     # Progress hook
     def hook(epoch, t, ll):
 
-        if epoch % 10 != 0: return
+        if epoch % 10 != 0:
+            return
 
         ll_valid, _ = model.est_loglik(x_valid, n_samples=L_valid, n_batch=n_batch, byteToFloat=byteToFloat)
 
@@ -395,8 +395,10 @@ def epoch_vae_adam(model, x, n_batch=100, convertImgs=False, bernoulli_x=False, 
             idx_to = min(n_tot, idx_from + n_batch)
             x_minibatch = ndict.getCols(x, idx_from, idx_to)
             idx_from += n_batch
-            if byteToFloat: x_minibatch['x'] = x_minibatch['x'].astype(np.float32) / 256.
-            if bernoulli_x: x_minibatch['x'] = np.random.binomial(n=1, p=x_minibatch['x']).astype(np.float32)
+            if byteToFloat:
+                x_minibatch['x'] = x_minibatch['x'].astype(np.float32) / 256.
+            if bernoulli_x:
+                x_minibatch['x'] = np.random.binomial(n=1, p=x_minibatch['x']).astype(np.float32)
 
             # Do gradient ascent step
             L += model.evalAndUpdate(x_minibatch, {}).sum()

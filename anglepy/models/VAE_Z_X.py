@@ -1,12 +1,11 @@
+import inspect
+
 import numpy as np
-import theano
 import theano.tensor as T
-import collections as C
+
 import anglepy as ap
 import anglepy.ndict as ndict
 from anglepy.misc import lazytheanofunc
-
-import math, inspect
 
 '''
 Fully connected deep variational auto-encoder (VAE_Z_X)

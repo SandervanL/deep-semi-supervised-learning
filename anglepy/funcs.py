@@ -28,12 +28,14 @@ class FuncLikelihood():
         return logpx, logpz, g
 
     def val(self, w, z):
-        if self.n_minibatches == 1: return self.subval(0, w, z)
+        if self.n_minibatches == 1:
+            return self.subval(0, w, z)
         logpx, logpz = tuple(zip(*[self.subval(i, w, z) for i in range(self.n_minibatches)]))
         return np.hstack(logpx), np.hstack(logpz)
 
     def grad(self, w, z):
-        if self.n_minibatches == 1: return self.subgrad(0, w, z)
+        if self.n_minibatches == 1:
+            return self.subgrad(0, w, z)
         logpxi, logpzi, gwi, _ = tuple(zip(*[self.subgrad(i, w, z) for i in range(self.n_minibatches)]))
         return np.hstack(logpxi), np.hstack(logpzi), ndict.sum(gwi)
 
@@ -56,7 +58,8 @@ class FuncPosterior():
         logpx, logpz, gw = self.ll.subgrad(i, w, z)
         logpw, gw_prior = self.model.dlogpw_dw(w)
         prior_weight = 1. / float(self.ll.n_minibatches)
-        for j in gw: gw[j] += prior_weight * gw_prior[j]
+        for j in gw:
+            gw[j] += prior_weight * gw_prior[j]
         return logpx.sum() + logpz.sum() + prior_weight * logpw, gw
 
     def val(self, w, z={}):
@@ -66,7 +69,8 @@ class FuncPosterior():
     def grad(self, w, z={}):
         logpx, logpz, gw = self.ll.grad(w, z)
         prior, gw_prior = self.model.dlogpw_dw(w)
-        for i in gw: gw[i] += gw_prior[i]
+        for i in gw:
+            gw[i] += gw_prior[i]
         return logpx.sum() + logpz.sum() + prior, gw
 
 
@@ -90,7 +94,8 @@ class FuncLikelihoodPar():
 
         print('ipcluster size = ' + str(self.clustersize))
         n_train = next(iter(x.values())).shape[1]
-        if n_train % (self.n_batch * len(c)) != 0: raise BaseException()
+        if n_train % (self.n_batch * len(c)) != 0:
+            raise BaseException()
         self.blocksize = self.n_batch * len(c)
         self.n_minibatches = n_train / self.blocksize
 
@@ -109,7 +114,8 @@ class FuncLikelihoodPar():
             'my_n_batch = ' + str(n_batch),
             'my_model = ' + module + '.' + function + '(**args)'
         ]
-        for cmd in commands: c[:].execute(cmd).get()
+        for cmd in commands:
+            c[:].execute(cmd).get()
         # Import data on slaves
         for i in range(len(c)):
             _x = ndict.getCols(x, i * (n_train / len(c)), (i + 1) * (n_train / len(c)))
@@ -165,8 +171,10 @@ class FuncLikelihoodPar():
         for k in range(1, len(self.c)):
             vi, gwi, gzi = res[k]
             v += vi
-            for j in gw: gw[j] += gwi[j]
-            for j in gz: gz[j] += gzi[j]
+            for j in gw:
+                gw[j] += gwi[j]
+            for j in gz:
+                gz[j] += gzi[j]
         return v, gw, gz
 
     def grad(self, w, z=None):
@@ -174,8 +182,10 @@ class FuncLikelihoodPar():
         for i in range(1, self.n_minibatches):
             vi, gwi, gzi = self.subgrad(i, w, z)
             v += vi
-            for j in gw: gw[j] += gwi[j]
-            for j in gz: gz[j] += gzi[j]
+            for j in gw:
+                gw[j] += gwi[j]
+            for j in gz:
+                gz[j] += gzi[j]
         return v, gw, gz
 
     def val(self, w, z=None):
@@ -192,8 +202,10 @@ class FuncLikelihoodPar():
             logpxi, logpzi, gwi, gzi = self.subgrad(i, w, z)
             logpx += logpxi
             logpz += logpzi
-            for j in gw: gw[j] += gwi[j]
-            for j in gz: gz[j] += gzi[j]
+            for j in gw:
+                gw[j] += gwi[j]
+            for j in gz:
+                gz[j] += gzi[j]
         return logpx, logpz, gw, gz
 
     # Helper function
@@ -249,7 +261,8 @@ class FuncPosteriorMC():
         v_prior, gw_prior = self.model.dlogpw_dw(w)
         prior_weight = 1. / float(self.ll.n_minibatches)
         v = logpx.sum() + prior_weight * v_prior
-        for j in gw: gw[j] += prior_weight * gw_prior[j]
+        for j in gw:
+            gw[j] += prior_weight * gw_prior[j]
         return logpx.sum(), v, gw
 
     def val(self, w):
@@ -261,5 +274,6 @@ class FuncPosteriorMC():
         logpx, gw = self.ll.grad(w)
         v_prior, gw_prior = self.model.dlogpw_dw(w)
         v = logpx.sum() + v_prior
-        for i in gw: gw[i] += gw_prior[i]
+        for i in gw:
+            gw[i] += gw_prior[i]
         return logpx.sum(), v, gw

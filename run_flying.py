@@ -1,11 +1,10 @@
+import numpy as np
+import os
 import sys
 
-import math, os, time, scipy.stats, numpy as np, pylab, PIL.Image
-import matplotlib.pyplot as plt, matplotlib.cm as cm
+import matplotlib.pyplot as plt
 import numpy.random
-import theano, theano.tensor as T
-import anglepy as ap
-import anglepy.models as apmodels
+
 import anglepy.ndict as ndict
 import anglepy.paramgraphics as paramgraphics
 
@@ -128,12 +127,15 @@ for i in range(2000):
         plt.show()
         plt.draw()
     else:
-        if not os.path.exists(logdir): os.makedirs(logdir)
+        if not os.path.exists(logdir):
+            os.makedirs(logdir)
         image = paramgraphics.mat_to_img(x_samples, dim_input, colorImg=colorImg, tile_shape=tile_shape)
         # Make sure the nr of rows and cols are even
         width, height = image.size
-        if width % 2 == 1: width += 1
-        if height % 2 == 1: height += 1
+        if width % 2 == 1:
+            width += 1
+        if height % 2 == 1:
+            height += 1
         image = image.resize((width, height))
         # Save it
         fname = logdir + '/' + str(i) + '.png'

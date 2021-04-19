@@ -1,12 +1,11 @@
+import inspect
+
 import numpy as np
-import theano
 import theano.tensor as T
-import collections as C
+
 import anglepy as ap
 import anglepy.ndict as ndict
 from anglepy.misc import lazytheanofunc
-
-import math, inspect
 
 '''
 Variational AE (VAE) with P(Z)P(Y)P(X|Y,Z)
@@ -106,7 +105,8 @@ class VAE_YZ_X(ap.VAEModel):
 
         # log p(y) (prior of y)
         _logpy = w['logpy']
-        if self.uniform_y: _logpy *= 0
+        if self.uniform_y:
+            _logpy *= 0
         py_model = T.nnet.softmax(T.dot(_logpy, A).T).T
         logpy = (- T.nnet.categorical_crossentropy(py_model.T, x['y'].T).T).reshape((1, -1))
         logpx += logpy

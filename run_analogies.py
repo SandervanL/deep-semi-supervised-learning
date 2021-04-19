@@ -1,18 +1,15 @@
+import numpy as np
+import os
 import sys
+
+import numpy.random
+
+import anglepy.ndict as ndict
+import anglepy.paramgraphics as paramgraphics
+import preprocessing as pp
 
 sys.path.append('..')
 sys.path.append('../../data/')
-
-import math, os, time, scipy.stats, numpy as np, pylab, PIL.Image
-import matplotlib.pyplot as plt, matplotlib.cm as cm
-import numpy.random
-import theano, theano.tensor as T
-import anglepy as ap
-import anglepy.models as apmodels
-import anglepy.ndict as ndict
-import anglepy.paramgraphics as paramgraphics
-
-import preprocessing as pp
 
 dataset = sys.argv[1]
 draw_rows = 1  # bool(sys.argv[2])
@@ -113,7 +110,8 @@ noise_var = 0.06
 import time
 
 logdir = 'results/analogies_new_' + dataset + '_' + str(int(time.time()))
-if not os.path.exists(logdir): os.makedirs(logdir)
+if not os.path.exists(logdir):
+    os.makedirs(logdir)
 
 if draw_rows:
     tile_shape1 = (n_batch_w, 1)

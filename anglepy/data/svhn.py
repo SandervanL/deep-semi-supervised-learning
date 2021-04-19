@@ -1,6 +1,8 @@
+import math
+import os
+
 import numpy as np
 import scipy.io
-import os, time, math
 
 path = os.environ['ML_DATA_PATH']
 

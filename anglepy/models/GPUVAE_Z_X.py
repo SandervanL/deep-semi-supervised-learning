@@ -1,12 +1,12 @@
+import inspect
+
 import numpy as np
 import theano
 import theano.tensor as T
-import collections as C
+
 import anglepy as ap
 import anglepy.ndict as ndict
 from anglepy.misc import lazytheanofunc
-
-import math, inspect
 
 
 # import theano.sandbox.cuda.rng_curand as rng_curand
@@ -42,8 +42,10 @@ class GPUVAE_Z_X(ap.GPUVAEModel):
 
         # Init weights
         v, w = self.init_w(1e-2)
-        for i in v: v[i] = shared32(v[i])
-        for i in w: w[i] = shared32(w[i])
+        for i in v:
+            v[i] = shared32(v[i])
+        for i in w:
+            w[i] = shared32(w[i])
         self.v = v
         self.w = w
 
@@ -197,8 +199,10 @@ class GPUVAE_Z_X(ap.GPUVAEModel):
         x, z = ndict.ordereddicts((x, z))
 
         A = np.ones((1, n_batch)).astype(np.float32)
-        for i in z: z[i] = z[i].astype(np.float32)
-        for i in x: x[i] = x[i].astype(np.float32)
+        for i in z:
+            z[i] = z[i].astype(np.float32)
+        for i in x:
+            x[i] = x[i].astype(np.float32)
 
         _z = {}
 
